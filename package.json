@@ -12,6 +12,19 @@
     "workspace"
   ],
   "main": "./dist/extension.js",
+  "scripts": {
+    "build": "npm run typecheck && node ./scripts/esbuild.mjs --production",
+    "watch": "node ./scripts/esbuild.mjs --watch",
+    "lint": "npm run lint:code && npm run lint:format",
+    "lint:code": "eslint . --max-warnings=0",
+    "lint:format": "prettier --check .",
+    "typecheck": "tsc -p tsconfig.extension.json && tsc -p tsconfig.webview.json && tsc -p tsconfig.unit.json",
+    "test:unit": "vitest run",
+    "test:integration": "npm run build && tsc -p test/integration/tsconfig.json && vscode-test",
+    "test": "npm run test:unit && npm run test:integration",
+    "vscode:prepublish": "npm run build",
+    "package": "vsce package --no-dependencies --out artifacts/voicomp.vsix"
+  },
   "contributes": {
     "commands": [
       {

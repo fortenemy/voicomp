@@ -5,7 +5,8 @@ node_modules/
 dist/
 out/
 coverage/
-artifacts/
+artifacts/*
+!artifacts/.gitkeep
 .vscode-test/
 .vscode-test-web/
 *.tsbuildinfo
