@@ -59,10 +59,10 @@ This is the first implementation phase and must be completed before real OpenAI 
 - [x] Configure Prettier.
 - [x] Configure Vitest.
 - [x] Configure the official VS Code integration test harness.
-- [ ] Implement `activate()` and `deactivate()`.
-- [ ] Register the Activity Bar container.
-- [ ] Register the sidebar Webview view.
-- [ ] Register `Voicomp: Open Assistant`.
+- [x] Implement `activate()` and `deactivate()`.
+- [x] Register the Activity Bar container.
+- [x] Register the sidebar Webview view.
+- [x] Register `Voicomp: Open Assistant`.
 - [ ] Add a minimal sidebar UI.
 - [ ] Add a mock connection state.
 - [ ] Add a mock transcript entry.
