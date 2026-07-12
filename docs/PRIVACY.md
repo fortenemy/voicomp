@@ -35,16 +35,19 @@ recording or transcript of the user.
 
 **Future Phase 3 requirement:** Voicomp will use a bring-your-own-key flow. The
 user will enter a standard OpenAI API key through a dedicated editor command. The
-Extension Host will store it with VS Code `ExtensionContext.secrets` and use it
-only in trusted host-side code. The standard key will never enter the Webview,
-workspace settings, logs, transcripts, source control, or the packaged extension.
+standard API key will be retained only in trusted Extension Host
+`ExtensionContext.secrets` storage and local memory. For a user-started Realtime
+session, the Extension Host will transmit it over authenticated HTTPS to OpenAI
+solely to call `POST /v1/realtime/client_secrets`. The standard key will never
+enter the Webview, settings, logs, transcripts, source control, or the packaged
+extension.
 
-For a user-started Realtime session, the Extension Host may use the standard key
-to obtain a short-lived OpenAI client secret. Only that ephemeral secret and a
-bounded session configuration will enter the Webview. The Webview may then create
-the WebRTC connection, capture microphone input after editor or operating-system
-permission, play assistant audio, and exchange Realtime events. Stop, expiry,
-reload, and disposal will clear transient credentials and session state.
+OpenAI will return a short-lived client secret. Only that ephemeral secret and a
+bounded session configuration will enter the Webview. The Webview may then
+create the WebRTC connection, capture microphone input after editor or
+operating-system permission, play assistant audio, and exchange Realtime events.
+Stop, expiry, reload, and disposal will clear transient credentials and session
+state.
 
 **Future Phase 4 and later requirement:** Provider-bound workspace context will
 come only from the explicit selection, active request, or a validated, bounded
@@ -73,6 +76,7 @@ Phase 1 will remain offline.
 
 | Category | Future condition for transfer | Destination and limit |
 | --- | --- | --- |
+| Standard OpenAI API key | The user starts a Realtime session and the Extension Host requests a short-lived client secret | Retained only in trusted Extension Host SecretStorage and local memory; transmitted over authenticated HTTPS to OpenAI solely to call `POST /v1/realtime/client_secrets`; never enters the Webview, settings, or logs |
 | Microphone audio | The user starts a live session and grants microphone access | OpenAI Realtime over the authorized WebRTC session; Voicomp will not log or persist source audio |
 | Transcript or typed conversation | The user participates in a live provider session | OpenAI receives the conversation events needed for that session; local persistence remains off by default |
 | Workspace content | The user selects content or the active request triggers an allowed, visible, bounded read-only tool | OpenAI receives only the context identified for that request, subject to trust, sensitivity, type, size, line, result-count, and total-context limits |

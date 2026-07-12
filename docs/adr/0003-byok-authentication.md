@@ -34,10 +34,13 @@ settings, Webview state, global state, environment files, diagnostics, telemetry
 fixtures, or logs.
 
 When the user starts a Realtime session, the Extension Host will retrieve the standard
-key, call `POST /v1/realtime/client_secrets`, and pass only the returned short-lived
-ephemeral secret plus bounded session configuration to the Webview. The Host must
-sanitize failures before displaying or logging them. The key is used only for this
-user-requested provider operation and is never made available to workspace tools.
+key into local memory and transmit it over authenticated HTTPS to OpenAI solely to call
+`POST /v1/realtime/client_secrets`. The key is retained only in trusted Extension Host
+SecretStorage and local memory; it never enters the Webview, settings, logs,
+diagnostics, source control, or packaged assets. The Host passes only the returned
+short-lived ephemeral secret plus bounded session configuration to the Webview and
+must sanitize failures before displaying or logging them. The key is never made
+available to workspace tools.
 
 Future Phase 3 will also implement `Voicomp: Clear OpenAI API Key`. Clearing deletes
 the value from SecretStorage, terminates sessions that depend on it, invalidates
@@ -73,13 +76,15 @@ scope and a materially different privacy and security model.
 
 ## Security and Privacy Impact
 
-The standard key remains confined to trusted host memory and encrypted SecretStorage;
-only a short-lived client secret crosses to the Webview. Logs and diagnostics must use
-allowlisted metadata and never include credentials, headers, request bodies, provider
-payloads, source content, transcripts, or audio. Secret clearing and session disposal
-must be deterministic and testable. BYOK does not eliminate provider processing: users
-must receive accurate disclosure of what audio, conversation, and bounded workspace
-context OpenAI receives during a live session.
+The standard key is retained only in trusted Extension Host SecretStorage and local
+memory, but it is transmitted over authenticated HTTPS to OpenAI solely to call
+`POST /v1/realtime/client_secrets`. It never enters the Webview, settings, or logs;
+only the returned short-lived client secret crosses to the Webview. Logs and
+diagnostics must use allowlisted metadata and never include credentials, headers,
+request bodies, provider payloads, source content, transcripts, or audio. Secret
+clearing and session disposal must be deterministic and testable. BYOK does not
+eliminate provider processing: users must receive accurate disclosure of what audio,
+conversation, and bounded workspace context OpenAI receives during a live session.
 
 ## Sources
 

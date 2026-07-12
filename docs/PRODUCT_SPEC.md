@@ -34,11 +34,13 @@ where standard VS Code Extension APIs support the required behavior.
 
 ## Delivery status and boundaries
 
+All 19 Phase 0 master tasks are complete. Phase 0 boundary verification/memory/log/GitHub synchronization is in progress. Phase 1 has not started.
+
 Voicomp has three distinct delivery horizons:
 
 | Horizon | Status | Included outcome | Explicitly absent |
 | --- | --- | --- | --- |
-| Current repository | Phase 0 in progress | Repository foundation, product and engineering documentation, decision records, and task controls | Extension production code, npm package, voice, network, workspace tools, edits, terminal actions, and a VSIX |
+| Current repository | Phase 0 boundary synchronization in progress; Phase 1 not started | Repository foundation, product and engineering documentation, decision records, and task controls | Extension production code, npm package, voice, network, workspace tools, edits, terminal actions, and a VSIX |
 | Current implementation milestone | Phase 1 target | Offline, installable extension shell with Activity Bar entry, secure sidebar Webview, typed message round trip, mock state, tests, build scripts, and local VSIX packaging | OpenAI integration, microphone capture, live audio, real provider traffic, workspace reads, edits, Git tools, and terminal execution |
 | Functional MVP and release path | Future phases | Real voice conversation, controlled context, planning, read-only project tools, approved edits and commands, hardening, packaging, compatibility evidence, and release preparation | Any capability listed as a first-MVP non-goal |
 
@@ -135,7 +137,8 @@ that functional boundary but remain required for the complete project.
 ### Secure user-provided authentication
 
 - The user supplies their own provider API key through a secure editor flow.
-- The standard API key is stored only through VS Code secret storage.
+- The standard API key is stored persistently only through VS Code secret
+  storage.
 - The standard API key never enters Webview state, logs, diagnostics, source
   control, packaged files, or transcripts.
 - The Extension Host obtains any short-lived browser credential required for a
@@ -199,7 +202,8 @@ that functional boundary but remain required for the complete project.
   state transitions.
 - Safe behavior across untrusted, multi-root, large-file, unusual-name,
   symbolic-link, reload, and supported remote-workspace cases.
-- Dependency and secret review with no source code logged by default.
+- Dependency and secret review with prompts, selections, source files, and file
+  content excluded from logs.
 - Reproducible build and VSIX packaging, package-content inspection, and clean
   VS Code installation testing.
 - Cursor behavior tested and documented without weakening VS Code behavior or
@@ -359,9 +363,9 @@ automatic tool actions. The UI must explain the restriction clearly.
   approval, must be opt-in, and must exclude source code, prompts, file content,
   secrets, and microphone audio.
 - Logs may include lifecycle state, tool names, durations, sanitized errors, and
-  request identifiers. They must not include complete prompts, full source files,
-  secret values, authentication headers, environment values, or microphone
-  audio.
+  request identifiers. They must never include prompts, selections, source files,
+  file content, secret values, authentication headers, environment values, or
+  microphone audio.
 - Users receive explicit controls to clear secrets and session context and to
   disable context sources.
 
@@ -369,7 +373,8 @@ automatic tool actions. The UI must explain the restriction clearly.
 
 User-facing failures must be concise and actionable. Sanitized technical details
 may be written to the Voicomp Output Channel, but raw stack traces, message
-payloads, secrets, source files, and audio must not be exposed there.
+payloads, secrets, prompts, selections, source files, file content, and audio
+must not be exposed there.
 
 Voicomp must report unavailable tools, blocked paths, truncation, stale edit
 proposals, denied permissions, connection failures, timeouts, and unsupported
@@ -419,7 +424,8 @@ that:
   automatically;
 - sensitive, binary, oversized, outside-workspace, and unsupported content is
   blocked or handled through the declared safe flow;
-- the standard API key is held only in secret storage and never enters the
+- the standard API key is persisted only in secret storage, retained only in
+  trusted Extension Host local memory while needed, and never enters the
   Webview, logs, package, or repository;
 - untrusted workspaces disable broad reads and dangerous actions;
 - an edit proposal shows the exact diff, rejection changes nothing, stale

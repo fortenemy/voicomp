@@ -6,13 +6,15 @@ Voicomp is an MIT-licensed VS Code extension intended to provide a real-time voi
 assistant with controlled access to the active workspace. This document is the
 repository-wide security model and disclosure policy.
 
-The repository is currently in Phase 0 and contains documentation only. No
-extension runtime, Webview, provider connection, microphone path, workspace tool,
-approval gate, or security control described below has been implemented. Phase 1
-is planned as an offline extension: it will use mock state and transcript data,
-make no provider call, capture no audio, read no workspace content, and perform no
-mutation. Controls assigned to later phases are requirements for future work, not
-claims about current protection or authorization to implement those phases.
+All 19 Phase 0 master tasks are complete. Phase 0 boundary verification/memory/log/GitHub synchronization is in progress. Phase 1 has not started.
+
+The repository contains documentation only: no extension runtime, Webview,
+provider connection, microphone path, workspace tool, approval gate, or security
+control described below has been implemented. Phase 1 is planned as an offline
+extension: it will use mock state and transcript data, make no provider call,
+capture no audio, read no workspace content, and perform no mutation. Controls
+assigned to later phases are requirements for future work, not claims about
+current protection or authorization to implement those phases.
 
 ## Assets and security objectives
 
@@ -112,11 +114,12 @@ collection; omissions and truncation are visible.
 
 Voicomp is bring-your-own-key. In Phase 3, the standard OpenAI API key will be
 accepted through a dedicated command, stored only with
-`ExtensionContext.secrets`, and used only in trusted host-side code. The Extension
-Host owns the standard key; the Webview never receives it. The host may mint a
-short-lived provider client secret and pass only that transient credential plus a
-bounded session configuration to the Webview. Stop, expiry, reload, and disposal
-clear transient credentials and session state.
+`ExtensionContext.secrets`, retained only in trusted Extension Host local memory,
+and transmitted over authenticated HTTPS to OpenAI solely to call
+`POST /v1/realtime/client_secrets`. The Webview never receives the standard key.
+The host may pass only the returned short-lived client secret plus a bounded
+session configuration to the Webview. Stop, expiry, reload, and disposal clear
+transient credentials and session state.
 
 Secrets must not appear in source, settings files, command arguments, errors,
 logs, telemetry, transcripts, test fixtures, build artifacts, or packaged VSIX

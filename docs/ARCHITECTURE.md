@@ -61,6 +61,81 @@ The provider interface exposes session start/stop, normalized input/output event
 tool-call delivery, interruption, cancellation, and disposal. Generic conversation,
 context, tool, and approval code must not depend on OpenAI payload types.
 
+## Future Tool Registry boundary
+
+The Tool Registry is a future Extension Host component introduced with the
+read-only tools in Phase 4 and extended only in their owning later phases. It is
+not implemented in Phase 0 or authorized for Phase 1. The composition root owns
+one registry; the model, provider, and Webview cannot register tools or bypass
+its dispatch path.
+
+The registry owns the allowlisted tool catalog, unique tool identifiers, runtime
+input and output schemas, risk metadata, lookup, validated dispatch, and result
+normalization. Tool implementations own their narrow VS Code or platform
+mechanism, while host policy owns authorization and approval decisions. Each
+definition declares its risk class (`read-only`, `sensitive/broad read`,
+`proposal`, `mutation`, or `execution`), workspace-trust requirement, approval
+requirement, supported URI or platform capabilities, and input/output limits.
+
+Every invocation accepts an `unknown` argument payload plus an internal execution
+context containing the session, explicit workspace root, trust state, budgets,
+and cancellation signal. The registry validates before policy evaluation and
+dispatch. It returns a bounded internal result discriminated as success,
+cancelled, denied, unavailable, timed out, or failed, with explicit truncation
+metadata and a sanitized error category. Provider-specific tool calls are
+normalized into this contract before dispatch, and internal results are
+normalized again before any provider adapter sees them; OpenAI payload types do
+not enter tool implementations.
+
+The session owns pending invocation scopes, each tool observes its per-call
+cancellation signal, and registry disposal rejects new calls and cancels or
+awaits outstanding work through the owning session. Late results are ignored by
+session correlation. The registry and policy contracts are constructor-injected
+testing seams: unit tests use fake definitions, policies, clocks, and
+cancellation, while adapter contract tests use synthetic VS Code/workspace
+fixtures without a provider or Webview.
+
+## Future Storage boundary
+
+Storage is a future trusted Extension Host boundary, added only by each owning
+phase. No storage subsystem exists in Phase 0, and Phase 1 must not add secret,
+transcript, or conversation persistence. The composition root owns the storage
+adapters; the Webview and provider can request only validated operations through
+host coordinators and never access VS Code storage APIs directly.
+
+The future contracts are deliberately separate:
+
+- `SecretStore` exposes only get, set, and delete operations for named extension
+  secrets backed by `ExtensionContext.secrets`. Phase 3 uses it for the standard
+  API key; values are never enumerable, mirrored into settings, or returned to
+  the Webview.
+- `SettingsStore` exposes runtime-validated reads and change subscriptions for
+  namespaced, non-secret VS Code configuration. Invalid values produce a safe
+  default or explicit validation failure according to the setting contract;
+  arbitrary workspace data and credentials are outside this store.
+- `SessionStore` owns transient session state, short-lived client secrets, and
+  transcript state in memory. Its default contract has no persistence method;
+  any later user-requested transcript export is a separate, visible operation,
+  not an implicit storage mode.
+
+The composition root disposes settings subscriptions and drops host references
+on deactivation. Normal `SecretStore` disposal does not delete the user's stored
+key; only the explicit clear-key command does. A session owns its `SessionStore`,
+which clears transient credentials and conversation state on stop, expiry,
+reload, view disposal, or deactivation before releasing listeners. Disposal and
+clear operations are idempotent, and late reads or writes fail closed.
+
+Voicomp creates no persistent session data by default. The standard API key is
+the only required persistent secret and exists only in SecretStorage; non-secret
+user preferences persist only through VS Code configuration. Session state,
+transcripts, ephemeral secrets, source content, and audio are not written to
+settings, global state, workspace state, files, Webview persistence, or logs.
+Constructor-injected contracts provide the testing seam: unit tests use in-memory
+`SecretStore`, `SettingsStore`, and `SessionStore` fakes, fake
+configuration-change events, and fake clocks; adapter tests mock VS Code
+SecretStorage and configuration to verify deletion, disposal, validation, and
+non-persistence without real credentials.
+
 ## Dependency direction
 
 Dependencies point inward: shared schemas and domain contracts → pure policies and
@@ -78,10 +153,12 @@ same correlated request/result path. Invalid messages are rejected without loggi
 payloads.
 
 Future voice: user starts session → host reads the standard key from SecretStorage
-and mints a short-lived client secret → only that secret and bounded session config
-cross to the Webview → Webview opens microphone/WebRTC/data channel → normalized
-events cross typed messages → host executes any allowed tool → bounded result
-returns to the provider path. Stop or expiry clears transient credentials and media.
+and transmits it over authenticated HTTPS to OpenAI solely to call
+`POST /v1/realtime/client_secrets` → only the returned short-lived secret and
+bounded session config cross to the Webview → Webview opens
+microphone/WebRTC/data channel → normalized events cross typed messages → host
+executes any allowed tool → bounded result returns to the provider path. Stop or
+expiry clears transient credentials and media.
 
 Future context: request → workspace trust/root/URI checks → sensitive and binary
 filter → configurable per-item and total context budget → normalized result. Limits
@@ -90,8 +167,9 @@ omission are explicit; the repository is never uploaded automatically.
 
 ## Security invariants
 
-- Standard API keys stay in SecretStorage and trusted host-side provider code; no
-  key, short-lived secret, source, transcript, or audio is logged.
+- Standard API keys are retained only in SecretStorage and trusted host memory and
+  are transmitted over authenticated HTTPS to OpenAI solely to mint a client
+  secret; no key, short-lived secret, source, transcript, or audio is logged.
 - Cross-boundary values start as `unknown` and pass strict, bounded runtime schemas.
 - Workspace access is root-bound, URI-aware, trust-gated, filtered, and budgeted.
 - Tools declare a risk level: read-only, sensitive/broad read, proposal, mutation,
