@@ -36,4 +36,21 @@ describe('registerCommands', () => {
     registration.dispose();
     expect(dispose).toHaveBeenCalledTimes(2);
   });
+
+  it('rolls back the first command when the second registration throws', () => {
+    const originalError = new Error('second-command-registration-failed');
+    const cleanupError = new Error('first-command-cleanup-failed');
+    const disposeFirst = vi.fn(() => {
+      throw cleanupError;
+    });
+    const registerCommand = vi
+      .fn()
+      .mockReturnValueOnce({ dispose: disposeFirst })
+      .mockImplementationOnce(() => {
+        throw originalError;
+      });
+
+    expect(() => registerCommands(registerCommand, vi.fn(), vi.fn())).toThrow(originalError);
+    expect(disposeFirst).toHaveBeenCalledOnce();
+  });
 });

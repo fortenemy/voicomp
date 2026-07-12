@@ -16,13 +16,27 @@ export function registerCommands(
   executeCommand: CommandExecutor,
   showInformationMessage: InformationMessagePresenter,
 ): Disposable {
-  const registrations = [
-    registerCommand(OPEN_ASSISTANT_COMMAND, createOpenAssistantCommand(executeCommand)),
-    registerCommand(
-      SET_OPENAI_API_KEY_COMMAND,
-      createSetApiKeyPlaceholderCommand(showInformationMessage),
-    ),
-  ];
+  const registrations: Disposable[] = [];
+
+  try {
+    registrations.push(
+      registerCommand(OPEN_ASSISTANT_COMMAND, createOpenAssistantCommand(executeCommand)),
+    );
+    registrations.push(
+      registerCommand(
+        SET_OPENAI_API_KEY_COMMAND,
+        createSetApiKeyPlaceholderCommand(showInformationMessage),
+      ),
+    );
+  } catch (error) {
+    try {
+      disposeRegistrations(registrations);
+    } catch {
+      // Preserve the registration failure that triggered rollback.
+    }
+    throw error;
+  }
+
   let disposed = false;
 
   return {
@@ -32,9 +46,23 @@ export function registerCommands(
       }
 
       disposed = true;
-      for (const registration of registrations) {
-        registration.dispose();
-      }
+      disposeRegistrations(registrations);
     },
   };
+}
+
+function disposeRegistrations(registrations: readonly Disposable[]): void {
+  let firstError: unknown;
+
+  for (const registration of [...registrations].reverse()) {
+    try {
+      registration.dispose();
+    } catch (error) {
+      firstError ??= error;
+    }
+  }
+
+  if (firstError) {
+    throw firstError;
+  }
 }

@@ -5,8 +5,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { OutputLogger } from '../../src/logging/OutputLogger.js';
 import { parseLogLevel } from '../../src/logging/logLevel.js';
 
-const sessionId = '2c1f0f0b-3db9-4ae9-9c42-5ba0616c430d';
-
 function createHarness(level: 'off' | 'error' | 'info') {
   const appendLine = vi.fn<(message: string) => void>();
   const dispose = vi.fn();
@@ -91,20 +89,30 @@ describe('OutputLogger', () => {
     ]);
   });
 
-  it('formats only bounded counts and generated UUIDs for metadata events', () => {
+  it('formats only bounded counts for metadata events', () => {
     const { appendLine, logger } = createHarness('info');
 
     logger.count('message.rejectedCount', 12);
-    logger.identifier('session.created', sessionId);
     logger.count('message.rejectedCount', -1);
     logger.count('message.rejectedCount', 10_001);
     logger.count('message.rejectedCount', Number.NaN);
-    logger.identifier('session.created', 'C:\\workspace\\secret.ts');
 
-    expect(appendLine.mock.calls).toEqual([
-      ['[info] message.rejectedCount count=12'],
-      [`[info] session.created id=${sessionId}`],
-    ]);
+    expect(appendLine.mock.calls).toEqual([['[info] message.rejectedCount count=12']]);
+  });
+
+  it('has no dynamic identifier surface and cannot log a UUID-shaped sensitive string', () => {
+    const { appendLine, logger } = createHarness('info');
+    const uuidShapedSensitiveValue = '2c1f0f0b-3db9-4ae9-9c42-5ba0616c430d';
+    const callWithUntrustedExtras = logger.routerEvent.bind(logger) as (
+      event: 'message.ready',
+      ...extras: unknown[]
+    ) => void;
+
+    expect(logger).not.toHaveProperty('identifier');
+    callWithUntrustedExtras('message.ready', uuidShapedSensitiveValue);
+
+    expect(appendLine).toHaveBeenCalledWith('[info] message.ready');
+    expect(JSON.stringify(appendLine.mock.calls)).not.toContain(uuidShapedSensitiveValue);
   });
 
   it('has no raw payload or Error parameter and cannot serialize extra arguments', () => {
@@ -135,7 +143,6 @@ describe('OutputLogger', () => {
     (logger.lifecycle as (event: string) => void)(secretMarker);
     (logger.routerEvent as (event: string) => void)(secretMarker);
     (logger.count as (event: string, count: number) => void)(secretMarker, 1);
-    (logger.identifier as (event: string, identifier: string) => void)(secretMarker, sessionId);
 
     expect(appendLine).not.toHaveBeenCalled();
   });

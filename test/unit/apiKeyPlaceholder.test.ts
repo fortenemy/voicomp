@@ -29,12 +29,14 @@ describe('Set OpenAI API Key placeholder', () => {
     });
   });
 
-  it('shows only fixed Phase 3 BYOK information', async () => {
-    const showInformationMessage = vi.fn(async () => undefined);
+  it('shows only fixed Phase 3 BYOK information and completes immediately', () => {
+    const neverSettles = new Promise<never>(() => undefined);
+    const showInformationMessage = vi.fn(() => neverSettles);
     const handler = createSetApiKeyPlaceholderCommand(showInformationMessage);
 
-    await handler();
+    const result = handler();
 
+    expect(result).toBeUndefined();
     expect(showInformationMessage).toHaveBeenCalledOnce();
     expect(showInformationMessage).toHaveBeenCalledWith(apiKeyPlaceholderMessage);
     expect(apiKeyPlaceholderMessage).toMatch(/secure BYOK/iu);

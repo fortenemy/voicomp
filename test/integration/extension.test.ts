@@ -88,5 +88,6 @@ suite('Voicomp extension shell', () => {
     assert.ok(commandIds.includes('voicomp.assistant.focus'));
 
     await vscode.commands.executeCommand('voicomp.assistant.focus');
+    await vscode.commands.executeCommand('voicomp.setOpenAIApiKey');
   });
 });

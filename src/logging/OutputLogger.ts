@@ -9,11 +9,8 @@ export interface OutputChannel extends Disposable {
 
 export type LifecycleEvent = 'extension.activated' | 'extension.deactivated';
 export type CountEvent = 'message.rejectedCount';
-export type IdentifierEvent = 'session.created';
 
 const maximumLogCount = 10_000;
-const generatedIdentifierPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 const lifecycleEvents = new Map<LifecycleEvent, string>([
   ['extension.activated', 'extension.activated'],
@@ -35,8 +32,6 @@ const routerEvents = new Map<WebviewRouterEvent, Exclude<LogLevel, 'off'>>([
 const countEvents = new Map<CountEvent, string>([
   ['message.rejectedCount', 'message.rejectedCount'],
 ]);
-
-const identifierEvents = new Map<IdentifierEvent, string>([['session.created', 'session.created']]);
 
 export class OutputLogger implements Disposable {
   private disposed = false;
@@ -67,15 +62,6 @@ export class OutputLogger implements Disposable {
     }
 
     this.write('info', `${safeEvent} count=${String(count)}`);
-  }
-
-  public identifier(event: IdentifierEvent, identifier: string): void {
-    const safeEvent = identifierEvents.get(event);
-    if (!safeEvent || !generatedIdentifierPattern.test(identifier)) {
-      return;
-    }
-
-    this.write('info', `${safeEvent} id=${identifier}`);
   }
 
   public dispose(): void {

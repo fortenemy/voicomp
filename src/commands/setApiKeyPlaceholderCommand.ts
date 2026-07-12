@@ -5,6 +5,8 @@ export type InformationMessagePresenter = (message: string) => unknown;
 
 export function createSetApiKeyPlaceholderCommand(
   showInformationMessage: InformationMessagePresenter,
-): () => unknown {
-  return () => showInformationMessage(apiKeyPlaceholderMessage);
+): () => void {
+  return () => {
+    void showInformationMessage(apiKeyPlaceholderMessage);
+  };
 }
