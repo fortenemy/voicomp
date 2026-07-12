@@ -87,3 +87,103 @@ the exact next unchecked task. Corrections must be added as a new dated note.
 ### Next unchecked task
 
 `Create docs/PRODUCT_SPEC.md`.
+
+## 2026-07-12 — Phase 0 completion boundary
+
+### Scope and completion state
+
+- Audited all 19 Phase 0 master tasks against an existing artifact or dated
+  decision. All 19 are complete; all later-phase tasks remain unchecked.
+- The authoritative roadmap contains 265 tasks. Its exact Phase 0 through
+  Phase 16 distribution is
+  `19, 29, 12, 18, 19, 10, 9, 12, 12, 17, 13, 20, 12, 17, 14, 18, 14`;
+  the checked-state result is `total=265 phase0_checked=19 later_checked=0`.
+- This entry closes the Phase 0 master-task evidence boundary. Boundary commit,
+  GitHub synchronization, and remote readback remain in progress until the
+  parent task completes them. Phase 1 has not started.
+
+### Decision-record commits and review
+
+- Phase 0 product and architecture decisions were recorded in:
+  - `3116d74` — product scope;
+  - `4f81090` — architecture;
+  - `c11a3da` — security model;
+  - `bb8b840` — privacy model;
+  - `a0fd969` — ADRs 0001-0003;
+  - `9c7032c` — platform, identifier, registry, and license decisions;
+  - `93095ab` — resolution of the Task 3 review findings.
+- The initial Task 3 review reported four Important findings: inconsistent
+  Phase 0/Phase 1 boundary wording, incomplete disclosure of the standard API
+  key retention and sole authenticated HTTPS transfer, a non-categorical
+  logging prohibition, and missing future Tool Registry and Storage boundary
+  contracts. Commit `93095ab` corrected all four, and the re-review was clean.
+
+### Repository, license, registry, and environment evidence
+
+- The remote initial commit
+  `0fb01b72e031d8c0e34607770bc717c475945ccb` contains the MIT license.
+  Local work was reconciled onto that remote ancestry without force or a
+  parallel history, and MIT is the authoritative licensing decision.
+- Before this boundary commit, local `main` tracked `origin/main` and was 10
+  commits ahead. No Phase 0 commit has been pushed yet.
+- Direct checks of the target VS Code Marketplace page and Open VSX endpoint on
+  2026-07-12 both returned HTTP `404`; Open VSX also reported that
+  `fortenemy.voicomp` was not found. These are point-in-time availability
+  checks, not a reservation, ownership proof, or publication approval.
+- Git's dubious-ownership guard was resolved with the repository-specific
+  global `safe.directory` value
+  `D:/projekty AI/voice_project_companion`. Codex ran as
+  `FORTENEMY\CodexSandboxOnline` while the workspace root belonged to
+  `FORTENEMY\fortenemy`; those identities have different SIDs.
+- Node.js `v24.9.0`, VS Code CLI `1.127.0`, and Cursor CLI `3.10.20`
+  were observed locally. Native `ralph-loop` and `ralph` commands are not
+  available.
+
+### Decisions
+
+- Product-facing naming is `Voicomp`; local package values are publisher
+  `fortenemy`, package `voicomp`, and target ID `fortenemy.voicomp`.
+  The physical workspace path remains unchanged.
+- Use Node.js 24 LTS, `engines.vscode` `^1.95.0`, and
+  `@types/vscode` pinned to `1.95.x`.
+- Keep secrets, workspace authority, tools, and mutations in the Extension
+  Host. The Webview owns browser media and UI only, and every cross-boundary
+  message requires runtime validation.
+- Phase 1 remains offline. Phase 3 will mint a short-lived Realtime client
+  secret in the Extension Host and use WebRTC in the Webview, preferring
+  `@openai/agents/realtime` behind the provider abstraction.
+- Cursor remains a tested target, not a compatibility guarantee. Mutations,
+  credentials, legal/privacy approval, packaging, publication, and manual
+  platform or microphone checks remain explicitly controlled.
+
+### Commands and validation
+
+- A 19-item evidence-map script verified every Phase 0 task and the three ADRs.
+- The exact roadmap script verified all 265 tasks, the full per-phase
+  distribution, 19 checked Phase 0 tasks, zero checked later tasks, and the
+  first open task.
+- Required commit subjects and scopes, the initial MIT tree, global
+  `safe.directory` origin, repository ownership, branch tracking, and
+  ahead-count were inspected with Git and PowerShell.
+- Markdown, naming, physical-path exception, unresolved-marker,
+  credential-pattern, trailing-whitespace, `git diff --check`,
+  `git diff --cached --check`, ignored-note, next-task consistency, and exact
+  staged-scope checks passed for this boundary.
+
+### Limitations, risks, and publication status
+
+- No production code, package manifest, dependency lockfile, npm script, VSIX,
+  OpenAI call, microphone capture, workspace tool, edit path, terminal path, or
+  release automation exists. Phase 1 lint, typecheck, tests, build, packaging,
+  and editor smoke checks are therefore not yet applicable.
+- Local Node.js must be updated within the Node.js 24 LTS line before Phase 1
+  dependency-lock generation.
+- Registry availability and external platform/API behavior may drift. Final
+  publisher registration and immutable ID approval, credentials, legal/privacy
+  approval, manual testing, and publication remain human-controlled.
+- The boundary files are staged for parent review. No boundary commit, push,
+  force push, credential use, publication, or remote mutation occurred here.
+
+### Next unchecked task
+
+`Create a TypeScript VS Code extension manifest`.
