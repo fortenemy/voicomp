@@ -68,9 +68,9 @@ This is the first implementation phase and must be completed before real OpenAI 
 - [x] Add a mock transcript entry.
 - [x] Add Extension Host ↔ Webview typed message passing.
 - [x] Add restrictive Webview CSP.
-- [ ] Add Output Channel logging.
-- [ ] Add basic settings.
-- [ ] Add a placeholder API-key command without calling OpenAI.
+- [x] Add Output Channel logging.
+- [x] Add basic settings.
+- [x] Add a placeholder API-key command without calling OpenAI.
 - [ ] Add `README.md`.
 - [ ] Add `.vscodeignore`.
 - [ ] Add `vscode:prepublish`.
