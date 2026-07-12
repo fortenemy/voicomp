@@ -80,9 +80,13 @@ extensionKind: ["workspace"]
 main: ./dist/extension.js
 ```
 
-Declare the `voicomp` Activity Bar container, `voicomp.assistant` Webview view,
-commands `voicomp.openAssistant` and `voicomp.setOpenAIApiKey`, and setting
-`voicomp.logging.level` with `off | error | info`, default `info`.
+Reserve these later contribution identifiers in this plan, but do not add their
+manifest contributions early: `voicomp` Activity Bar container,
+`voicomp.assistant` Webview view, commands `voicomp.openAssistant` and
+`voicomp.setOpenAIApiKey`, and setting `voicomp.logging.level`. The initial
+manifest contains only base extension/package metadata, entry point, engine, and
+workspace placement. Tasks 9-11 and 18-19 add each contribution in checklist
+order after its own RED test.
 
 Pin production dependency `zod@4.4.3`. Pin dev dependencies exactly:
 
