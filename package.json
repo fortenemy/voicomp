@@ -18,6 +18,11 @@
         "command": "voicomp.openAssistant",
         "title": "Open Assistant",
         "category": "Voicomp"
+      },
+      {
+        "command": "voicomp.setOpenAIApiKey",
+        "title": "Set OpenAI API Key",
+        "category": "Voicomp"
       }
     ],
     "viewsContainers": {
@@ -37,6 +42,21 @@
           "type": "webview"
         }
       ]
+    },
+    "configuration": {
+      "title": "Voicomp",
+      "properties": {
+        "voicomp.logging.level": {
+          "type": "string",
+          "enum": [
+            "off",
+            "error",
+            "info"
+          ],
+          "default": "info",
+          "description": "Controls sanitized Voicomp Output Channel logging."
+        }
+      }
     }
   },
   "dependencies": {

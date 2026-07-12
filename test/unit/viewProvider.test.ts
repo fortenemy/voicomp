@@ -107,6 +107,28 @@ describe('VoicompViewProvider', () => {
     provider.dispose();
   });
 
+  it('forwards only allowlisted router events to the injected logger sink', async () => {
+    const registerWebviewViewProvider = vi.fn(() => ({ dispose: vi.fn() }));
+    const logEvent = vi.fn();
+    const provider = new VoicompViewProvider(
+      registerWebviewViewProvider,
+      extensionUri,
+      joinPath,
+      logEvent,
+    );
+    const harness = createViewHarness();
+    provider.resolveWebviewView(harness.view);
+    const secretMarker = 'payload-must-not-be-logged';
+
+    await harness.receiveMessage({ type: 'webview.unknown', secretMarker });
+
+    expect(logEvent).toHaveBeenCalledOnce();
+    expect(logEvent).toHaveBeenCalledWith('message.invalid');
+    expect(JSON.stringify(logEvent.mock.calls)).not.toContain(secretMarker);
+
+    provider.dispose();
+  });
+
   it('disposes the router and subscriptions with the view', async () => {
     const registerWebviewViewProvider = vi.fn(() => ({ dispose: vi.fn() }));
     const provider = new VoicompViewProvider(registerWebviewViewProvider, extensionUri, joinPath);

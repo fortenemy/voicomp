@@ -2,7 +2,7 @@ import type { Disposable, Uri, WebviewView, WebviewViewProvider } from 'vscode';
 
 import { ASSISTANT_VIEW_ID } from '../commands/commandIds.js';
 import { createWebviewHtml } from './createWebviewHtml.js';
-import { WebviewMessageRouter } from './WebviewMessageRouter.js';
+import { WebviewMessageRouter, type WebviewRouterEvent } from './WebviewMessageRouter.js';
 
 export type WebviewViewProviderRegistrar = (
   viewId: string,
@@ -19,6 +19,7 @@ export class VoicompViewProvider implements WebviewViewProvider, Disposable {
     registerWebviewViewProvider: WebviewViewProviderRegistrar,
     private readonly extensionUri: Uri,
     private readonly joinPath: UriJoiner,
+    private readonly logEvent: (event: WebviewRouterEvent) => void = () => undefined,
   ) {
     this.registration = registerWebviewViewProvider(ASSISTANT_VIEW_ID, this);
   }
@@ -40,7 +41,7 @@ export class VoicompViewProvider implements WebviewViewProvider, Disposable {
 
     const router = new WebviewMessageRouter({
       postMessage: (message) => webviewView.webview.postMessage(message),
-      logEvent: () => undefined,
+      logEvent: this.logEvent,
     });
     const messageSubscription = webviewView.webview.onDidReceiveMessage((message) =>
       router.handleMessage(message),

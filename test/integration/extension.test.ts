@@ -8,6 +8,16 @@ interface VoicompManifest {
       title: string;
       category?: string;
     }>;
+    configuration?: {
+      properties?: Record<
+        string,
+        {
+          type?: string;
+          enum?: string[];
+          default?: string;
+        }
+      >;
+    };
     viewsContainers?: {
       activitybar?: Array<{
         id: string;
@@ -43,6 +53,20 @@ suite('Voicomp extension shell', () => {
       title: 'Open Assistant',
       category: 'Voicomp',
     });
+    const setApiKeyContribution = manifest.contributes?.commands?.find(
+      ({ command }) => command === 'voicomp.setOpenAIApiKey',
+    );
+    assert.deepEqual(setApiKeyContribution, {
+      command: 'voicomp.setOpenAIApiKey',
+      title: 'Set OpenAI API Key',
+      category: 'Voicomp',
+    });
+    assert.deepEqual(manifest.contributes?.configuration?.properties?.['voicomp.logging.level'], {
+      type: 'string',
+      enum: ['off', 'error', 'info'],
+      default: 'info',
+      description: 'Controls sanitized Voicomp Output Channel logging.',
+    });
     assert.deepEqual(manifest.contributes?.viewsContainers?.activitybar, [
       {
         id: 'voicomp',
@@ -60,6 +84,7 @@ suite('Voicomp extension shell', () => {
 
     const commandIds = await vscode.commands.getCommands(true);
     assert.ok(commandIds.includes('voicomp.openAssistant'));
+    assert.ok(commandIds.includes('voicomp.setOpenAIApiKey'));
     assert.ok(commandIds.includes('voicomp.assistant.focus'));
 
     await vscode.commands.executeCommand('voicomp.assistant.focus');
