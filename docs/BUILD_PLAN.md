@@ -52,13 +52,13 @@ This is the first implementation phase and must be completed before real OpenAI 
 
 ## Tasks
 
-- [ ] Create a TypeScript VS Code extension manifest.
-- [ ] Configure strict TypeScript.
-- [ ] Configure esbuild.
-- [ ] Configure ESLint.
-- [ ] Configure Prettier.
-- [ ] Configure Vitest.
-- [ ] Configure the official VS Code integration test harness.
+- [x] Create a TypeScript VS Code extension manifest.
+- [x] Configure strict TypeScript.
+- [x] Configure esbuild.
+- [x] Configure ESLint.
+- [x] Configure Prettier.
+- [x] Configure Vitest.
+- [x] Configure the official VS Code integration test harness.
 - [ ] Implement `activate()` and `deactivate()`.
 - [ ] Register the Activity Bar container.
 - [ ] Register the sidebar Webview view.
