@@ -6,9 +6,8 @@ Voicomp is an MIT-licensed VS Code extension intended to provide a real-time voi
 assistant with controlled access to the active workspace. This document is the
 repository-wide security model and disclosure policy.
 
-All 19 Phase 0 master tasks are complete and the initial closure is committed
-locally. Final-review corrections and GitHub synchronization are in progress.
-Phase 1 has not started.
+All 19 Phase 0 master tasks are complete, independently reviewed, committed,
+synchronized to GitHub, and read back from remote `main`. Phase 1 has not started.
 
 The repository contains documentation only: no extension runtime, Webview,
 provider connection, microphone path, workspace tool, approval gate, or security

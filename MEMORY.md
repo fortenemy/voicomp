@@ -2,9 +2,8 @@
 
 ## Current Position
 
-- All 19 Phase 0 master tasks are complete and the initial closure is committed
-  locally. Final-review corrections, GitHub synchronization, and remote readback
-  remain in progress.
+- All 19 Phase 0 master tasks are complete, independently reviewed, committed,
+  synchronized to GitHub, and read back from remote `main`.
 - Phase 1 has not started.
 - Authoritative task cursor: `docs/BUILD_PLAN.md`.
 - Authoritative roadmap state: 265 total tasks, 19 checked in Phase 0, and zero
@@ -16,9 +15,9 @@
 - Workspace: `D:\projekty AI\voice_project_companion`.
 - GitHub: https://github.com/fortenemy/voicomp
 - Branch: local `main`, tracking `origin/main`.
-- Phase 0 history is committed locally. At the last remote readback,
-  `origin/main` still contained only the initial MIT commit; synchronization is
-  pending and must remain a normal fast-forward.
+- The reviewed Phase 0 history through
+  `1638123f88b86673bde76d26172017ce85b5a165` was pushed to `origin/main` as a
+  normal fast-forward and confirmed by both Git and the GitHub connector.
 - Remote commit `0fb01b72e031d8c0e34607770bc717c475945ccb` contains the
   authoritative MIT license. Local history was reconciled onto that commit
   without force or parallel ancestry.
@@ -92,8 +91,11 @@
   was clean.
 - The whole-branch review after `665b397` found stale snapshot wording, an
   unresolved remote-credential boundary, a missing provider/billing human
-  action, and stale Node patch evidence. This snapshot incorporates those
-  corrections. GitHub synchronization remains pending, and Phase 1 is unopened.
+  action, and stale Node patch evidence. Commit `1638123` incorporates those
+  corrections; its independent re-review had no Critical, Important, or Minor
+  findings.
+- Git and GitHub connector readback confirmed remote `main` at `1638123` after
+  the fast-forward push. Phase 1 remains unopened.
 
 ## Next Unchecked Task
 
