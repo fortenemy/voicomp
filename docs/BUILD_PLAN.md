@@ -14,19 +14,19 @@ A task may be marked `- [x]` only after concrete evidence verifies completion, s
 - [x] Create `AGENTS.md`.
 - [x] Create `docs/BUILD_PLAN.md`.
 - [x] Create `docs/HUMAN_ACTIONS.md`.
-- [ ] Create `docs/PRODUCT_SPEC.md`.
-- [ ] Create `docs/ARCHITECTURE.md`.
-- [ ] Create `docs/SECURITY.md`.
-- [ ] Create `docs/PRIVACY.md`.
-- [ ] Create initial ADRs.
-- [ ] Determine the current supported Node.js development version.
-- [ ] Determine the minimum supported VS Code version.
-- [ ] Record the current official OpenAI Realtime connection method.
-- [ ] Record whether direct Realtime API or the current OpenAI Agents SDK is preferable.
-- [ ] Record Cursor compatibility assumptions as assumptions, not guarantees.
-- [ ] Select a placeholder publisher ID.
-- [ ] Select a final package identifier that is not already occupied.
-- [ ] Add licensing placeholder requiring human confirmation.
+- [x] Create `docs/PRODUCT_SPEC.md`.
+- [x] Create `docs/ARCHITECTURE.md`.
+- [x] Create `docs/SECURITY.md`.
+- [x] Create `docs/PRIVACY.md`.
+- [x] Create initial ADRs.
+- [x] Determine the current supported Node.js development version.
+- [x] Determine the minimum supported VS Code version.
+- [x] Record the current official OpenAI Realtime connection method.
+- [x] Record whether direct Realtime API or the current OpenAI Agents SDK is preferable.
+- [x] Record Cursor compatibility assumptions as assumptions, not guarantees.
+- [x] Select a placeholder publisher ID.
+- [x] Select a final package identifier that is not already occupied.
+- [x] Add licensing placeholder requiring human confirmation.
 
 ## Acceptance criteria
 
@@ -37,12 +37,12 @@ A task may be marked `- [x]` only after concrete evidence verifies completion, s
 
 ## Phase Notes
 
-- **Summary:** Repository inspection, Git initialization, `.gitignore`, persistent repository instructions, the complete roadmap, and the human-action register are verified. The first open task is `Create docs/PRODUCT_SPEC.md`.
-- **Files:** Verified Phase 0 foundation files include `.gitignore`, `AGENTS.md`, `MEMORY.md`, `docs/BUILD_PLAN.md`, `docs/HUMAN_ACTIONS.md`, and `docs/IMPLEMENTATION_LOG.md`; `README.md` and the approved design and implementation plan provide supporting context.
-- **Tests:** Markdown structure and required content were inspected; all 265 roadmap tasks retain the required per-phase distribution; exactly six Phase 0 tasks and no later task are checked; naming, trailing-whitespace, Git diff, and staged-scope checks passed.
-- **Limitations:** Phase 0 is not complete. No production code or npm scripts exist, so later lint, typecheck, test, and build checks are not yet applicable. Nothing was pushed in this session.
-- **Decisions:** Product naming is normalized to Voicomp; future setting and identifier examples use the `voicomp.*` namespace. The existing MIT license is selected, the local history is based on the remote MIT commit, and documentation remains the control plane until Phase 0 closes.
-- **Risks:** Product, architecture, security, privacy, ADR, external API, compatibility, publisher, package-identifier, and remaining license-record tasks are still open; publishing, credentials, manual platform tests, microphone tests, and final legal/privacy approval remain human-controlled.
+- **Summary:** Phase 0 is complete: all 19 tasks have concrete repository or command evidence, every major architectural and platform decision is recorded, and Phase 1 is now the next active phase. No production implementation was started.
+- **Files:** Verified evidence includes `.gitignore`, `AGENTS.md`, `LICENSE`, `MEMORY.md`, `docs/BUILD_PLAN.md`, `docs/HUMAN_ACTIONS.md`, `docs/IMPLEMENTATION_LOG.md`, `docs/PRODUCT_SPEC.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `docs/PRIVACY.md`, `docs/PLATFORM_DECISIONS.md`, and ADRs 0001-0003, with the approved design and plan as supporting context.
+- **Tests:** Phase 0 Markdown structure, required ADR headings, decision content, source links, and one-or-more evidence paths for every Phase 0 checkbox were inspected. The roadmap remains 265 tasks with its exact per-phase distribution, Phase 0 is 19/19 checked, and Phases 1-16 remain 0 checked. Environment, registry HTTP status, initial-license history, legacy-name, unresolved-marker, credential-pattern, trailing-whitespace, Git diff, and exact staged-scope checks passed.
+- **Limitations:** No production code, package manifest, dependency lockfile, npm script, VSIX, OpenAI call, or microphone flow exists, so Phase 1 lint, typecheck, test, build, packaging, and manual editor checks are not yet applicable. The local Node.js `v24.9.0` runtime must be updated within the Node.js 24 LTS line before dependency lock generation. Nothing was published or pushed.
+- **Decisions:** Use Node.js 24 LTS, `engines.vscode` `^1.95.0`, and `@types/vscode` pinned to `1.95.x`. Phase 3 will mint an ephemeral Realtime client secret in the Extension Host and use WebRTC in the Webview, preferring `@openai/agents/realtime` behind the provider abstraction; Phase 1 has no OpenAI integration. Cursor `3.10.20` is observed but remains unverified until VSIX smoke tests. Local identifiers are `fortenemy`, `voicomp`, and `fortenemy.voicomp`; the license is MIT from the remote initial commit.
+- **Risks:** Registry HTTP `404` results are point-in-time availability observations, not reservations. Final publisher registration and immutable ID approval remain open human actions, Cursor compatibility is unverified, external API and SDK behavior may drift, and credentials, manual platform and microphone testing, legal/privacy approval, and publication remain human-controlled.
 
 ---
 
