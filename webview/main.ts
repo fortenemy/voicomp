@@ -82,6 +82,21 @@ export function startWebviewController(
     }
 
     const message = parsedMessage.data;
+    if (message.type === 'host.error') {
+      if (message.requestId === pendingReadyRequestId) {
+        pendingReadyRequestId = undefined;
+        statusElement.textContent = message.message;
+        return;
+      }
+
+      if (message.requestId === pendingConnectionRequestId) {
+        pendingConnectionRequestId = undefined;
+        statusElement.textContent = message.message;
+        connectionButton.disabled = false;
+      }
+      return;
+    }
+
     if (message.type === 'host.initialState') {
       if (!pendingReadyRequestId || message.requestId !== pendingReadyRequestId || sessionId) {
         return;

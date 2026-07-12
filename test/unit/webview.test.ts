@@ -7,6 +7,7 @@ import { startWebviewController } from '../../webview/main.js';
 
 const readyRequestId = 'd9428888-122b-4d03-b7b7-3a35c10112e7';
 const connectionRequestId = '4c5fb8a4-a7a9-4bda-92b1-8e7428586d2e';
+const retryRequestId = '967c7feb-f790-49aa-87d0-66dc636faf96';
 const sessionId = '2c1f0f0b-3db9-4ae9-9c42-5ba0616c430d';
 const staleSessionId = '094f704a-dc5b-4d8c-845a-eb5f04205a62';
 
@@ -31,7 +32,7 @@ function dispatchHostMessage(data: unknown): void {
 }
 
 function createHarness() {
-  const requestIds = [readyRequestId, connectionRequestId];
+  const requestIds = [readyRequestId, connectionRequestId, retryRequestId];
   const postMessage = vi.fn();
   const controller = startWebviewController({
     document,
@@ -142,6 +143,91 @@ describe('startWebviewController', () => {
 
     expect(document.querySelector('#transcript-list')?.childElementCount).toBe(0);
     expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(true);
+
+    controller.dispose();
+  });
+
+  it('terminates pending startup after a correlated safe Host error', () => {
+    const { controller } = createHarness();
+    const safeError = 'The initial state could not be delivered.';
+
+    dispatchHostMessage({
+      type: 'host.error',
+      requestId: readyRequestId,
+      code: 'invalid_message',
+      message: safeError,
+    });
+    dispatchHostMessage({
+      type: 'host.error',
+      requestId: readyRequestId,
+      code: 'invalid_message',
+      message: 'Duplicate error must be ignored.',
+    });
+    dispatchHostMessage({
+      type: 'host.initialState',
+      requestId: readyRequestId,
+      sessionId,
+      connection: 'mock_disconnected',
+      transcript: [{ role: 'assistant', text: 'Late state must be ignored.' }],
+    });
+
+    expect(document.querySelector('#connection-status')?.textContent).toBe(safeError);
+    expect(document.querySelector('#transcript-list')?.childElementCount).toBe(0);
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(true);
+
+    controller.dispose();
+  });
+
+  it('clears a correlated connection error and allows one retry', () => {
+    const { controller, postMessage } = createHarness();
+    dispatchHostMessage({
+      type: 'host.initialState',
+      requestId: readyRequestId,
+      sessionId,
+      connection: 'mock_disconnected',
+      transcript: [{ role: 'assistant', text: 'Initial transcript' }],
+    });
+    document.querySelector<HTMLButtonElement>('#connection-check')?.click();
+    const safeError = 'The connection result could not be delivered.';
+
+    dispatchHostMessage({
+      type: 'host.error',
+      requestId: connectionRequestId,
+      code: 'invalid_message',
+      message: safeError,
+    });
+
+    expect(document.querySelector('#connection-status')?.textContent).toBe(safeError);
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(false);
+
+    document.querySelector<HTMLButtonElement>('#connection-check')?.click();
+    dispatchHostMessage({
+      type: 'host.error',
+      requestId: connectionRequestId,
+      code: 'invalid_message',
+      message: 'Duplicate error must be ignored.',
+    });
+    dispatchHostMessage({
+      type: 'host.error',
+      requestId: staleSessionId,
+      code: 'invalid_message',
+      message: 'Uncorrelated error must be ignored.',
+    });
+
+    expect(postMessage).toHaveBeenLastCalledWith({
+      type: 'webview.connectionCheck',
+      requestId: retryRequestId,
+      sessionId,
+    });
+    expect(document.querySelector('#connection-status')?.textContent).toBe(safeError);
+
+    dispatchHostMessage({
+      type: 'host.connectionCheckResult',
+      requestId: retryRequestId,
+      sessionId,
+      connection: 'mock_ready',
+    });
+    expect(document.querySelector('#connection-status')?.textContent).toBe('Mock ready');
 
     controller.dispose();
   });

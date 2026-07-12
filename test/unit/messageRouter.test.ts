@@ -129,13 +129,123 @@ describe('WebviewMessageRouter', () => {
     expect(postMessage).not.toHaveBeenCalled();
   });
 
-  it('revalidates outbound candidates before posting', async () => {
+  it('revalidates outbound candidates and replaces an invalid initial state with a safe error', async () => {
     const { logEvent, postMessage, router } = createHarness(() => 'not-a-uuid');
 
     await router.handleMessage({ type: 'webview.ready', requestId: firstRequestId });
 
-    expect(postMessage).not.toHaveBeenCalled();
+    expect(postMessage).toHaveBeenCalledOnce();
+    expect(hostToWebviewMessageSchema.parse(postMessage.mock.calls[0]?.[0])).toEqual({
+      type: 'host.error',
+      requestId: firstRequestId,
+      code: 'invalid_message',
+      message: 'The message could not be delivered.',
+    });
     expect(logEvent).toHaveBeenCalledWith('outbound.invalid');
+  });
+
+  it.each([
+    ['returns false', () => Promise.resolve(false), 'outbound.rejected'],
+    [
+      'throws',
+      () => Promise.reject(new Error('delivery-payload-must-not-be-logged')),
+      'outbound.failed',
+    ],
+  ])(
+    'rolls back a new session and posts one correlated safe error when initial delivery %s',
+    async (_description, failedDelivery, expectedEvent) => {
+      const { logEvent, postMessage, router } = createHarness();
+      postMessage.mockImplementationOnce(failedDelivery);
+
+      await router.handleMessage({ type: 'webview.ready', requestId: firstRequestId });
+
+      expect(postMessage).toHaveBeenCalledTimes(2);
+      const initialResponse = hostToWebviewMessageSchema.parse(postMessage.mock.calls[0]?.[0]);
+      const errorResponse = hostToWebviewMessageSchema.parse(postMessage.mock.calls[1]?.[0]);
+      expect(initialResponse.type).toBe('host.initialState');
+      expect(errorResponse).toEqual({
+        type: 'host.error',
+        requestId: firstRequestId,
+        code: 'invalid_message',
+        message: 'The message could not be delivered.',
+      });
+      expect(logEvent).toHaveBeenCalledWith(expectedEvent);
+      expect(JSON.stringify(logEvent.mock.calls)).not.toContain(
+        'delivery-payload-must-not-be-logged',
+      );
+      if (initialResponse.type !== 'host.initialState') {
+        return;
+      }
+      postMessage.mockClear();
+
+      await router.handleMessage({
+        type: 'webview.connectionCheck',
+        requestId: secondRequestId,
+        sessionId: initialResponse.sessionId,
+      });
+
+      expect(postMessage).not.toHaveBeenCalled();
+      expect(logEvent).toHaveBeenCalledWith('message.staleSession');
+    },
+  );
+
+  it('posts one correlated safe error after result delivery fails and keeps the session retryable', async () => {
+    const { postMessage, router } = createHarness();
+    await router.handleMessage({ type: 'webview.ready', requestId: firstRequestId });
+    const initialResponse = hostToWebviewMessageSchema.parse(postMessage.mock.calls[0]?.[0]);
+    expect(initialResponse.type).toBe('host.initialState');
+    if (initialResponse.type !== 'host.initialState') {
+      return;
+    }
+    postMessage.mockClear();
+    postMessage.mockResolvedValueOnce(false);
+
+    await router.handleMessage({
+      type: 'webview.connectionCheck',
+      requestId: secondRequestId,
+      sessionId: initialResponse.sessionId,
+    });
+
+    expect(postMessage).toHaveBeenCalledTimes(2);
+    expect(hostToWebviewMessageSchema.parse(postMessage.mock.calls[0]?.[0])).toEqual({
+      type: 'host.connectionCheckResult',
+      requestId: secondRequestId,
+      sessionId: initialResponse.sessionId,
+      connection: 'mock_ready',
+    });
+    expect(hostToWebviewMessageSchema.parse(postMessage.mock.calls[1]?.[0])).toEqual({
+      type: 'host.error',
+      requestId: secondRequestId,
+      code: 'invalid_message',
+      message: 'The message could not be delivered.',
+    });
+    postMessage.mockClear();
+
+    await router.handleMessage({
+      type: 'webview.connectionCheck',
+      requestId: firstRequestId,
+      sessionId: initialResponse.sessionId,
+    });
+
+    expect(postMessage).toHaveBeenCalledOnce();
+    expect(postMessage.mock.calls[0]?.[0]).toMatchObject({
+      type: 'host.connectionCheckResult',
+      requestId: firstRequestId,
+    });
+  });
+
+  it('stops after one safe-error attempt when both delivery attempts fail', async () => {
+    const { logEvent, postMessage, router } = createHarness();
+    postMessage.mockResolvedValueOnce(false).mockResolvedValueOnce(false);
+
+    await router.handleMessage({ type: 'webview.ready', requestId: firstRequestId });
+
+    expect(postMessage).toHaveBeenCalledTimes(2);
+    expect(postMessage.mock.calls[1]?.[0]).toMatchObject({
+      type: 'host.error',
+      requestId: firstRequestId,
+    });
+    expect(logEvent.mock.calls.filter(([event]) => event === 'outbound.rejected')).toHaveLength(2);
   });
 
   it('logs event categories without including rejected payload contents', async () => {

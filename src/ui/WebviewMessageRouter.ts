@@ -7,6 +7,10 @@ import {
 } from '../shared/messages.js';
 import { initialMockState } from '../shared/mockState.js';
 
+type DeliveryOutcome = 'delivered' | 'failed' | 'invalid' | 'cancelled';
+
+const deliveryErrorMessage = 'The message could not be delivered.';
+
 export type WebviewRouterEvent =
   | 'message.ready'
   | 'message.connectionCheck'
@@ -55,7 +59,7 @@ export class WebviewMessageRouter {
       this.currentSessionId = sessionId;
       const generation = ++this.generation;
       this.logEvent('message.ready');
-      await this.postValidated(
+      const outcome = await this.postValidated(
         {
           type: 'host.initialState',
           requestId: parsedMessage.data.requestId,
@@ -65,6 +69,23 @@ export class WebviewMessageRouter {
         },
         generation,
       );
+      if (
+        (outcome === 'failed' || outcome === 'invalid') &&
+        !this.disposed &&
+        generation === this.generation &&
+        sessionId === this.currentSessionId
+      ) {
+        this.currentSessionId = undefined;
+        await this.postValidated(
+          {
+            type: 'host.error',
+            requestId: parsedMessage.data.requestId,
+            code: 'invalid_message',
+            message: deliveryErrorMessage,
+          },
+          generation,
+        );
+      }
       return;
     }
 
@@ -75,7 +96,7 @@ export class WebviewMessageRouter {
 
     const generation = this.generation;
     this.logEvent('message.connectionCheck');
-    await this.postValidated(
+    const outcome = await this.postValidated(
       {
         type: 'host.connectionCheckResult',
         requestId: parsedMessage.data.requestId,
@@ -84,6 +105,22 @@ export class WebviewMessageRouter {
       },
       generation,
     );
+    if (
+      (outcome === 'failed' || outcome === 'invalid') &&
+      !this.disposed &&
+      generation === this.generation &&
+      parsedMessage.data.sessionId === this.currentSessionId
+    ) {
+      await this.postValidated(
+        {
+          type: 'host.error',
+          requestId: parsedMessage.data.requestId,
+          code: 'invalid_message',
+          message: deliveryErrorMessage,
+        },
+        generation,
+      );
+    }
   }
 
   public dispose(): void {
@@ -96,26 +133,29 @@ export class WebviewMessageRouter {
     this.generation += 1;
   }
 
-  private async postValidated(candidate: unknown, generation: number): Promise<void> {
+  private async postValidated(candidate: unknown, generation: number): Promise<DeliveryOutcome> {
     const parsedMessage = hostToWebviewMessageSchema.safeParse(candidate);
     if (!parsedMessage.success) {
       this.logEvent('outbound.invalid');
-      return;
+      return 'invalid';
     }
 
     await Promise.resolve();
     if (this.disposed || generation !== this.generation) {
       this.logEvent('message.late');
-      return;
+      return 'cancelled';
     }
 
     try {
       const accepted = await this.postMessage(parsedMessage.data);
       if (!accepted) {
         this.logEvent('outbound.rejected');
+        return 'failed';
       }
+      return 'delivered';
     } catch {
       this.logEvent('outbound.failed');
+      return 'failed';
     }
   }
 }
