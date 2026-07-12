@@ -12,6 +12,33 @@
     "workspace"
   ],
   "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "voicomp.openAssistant",
+        "title": "Open Assistant",
+        "category": "Voicomp"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "voicomp",
+          "title": "Voicomp",
+          "icon": "media/voicomp.svg"
+        }
+      ]
+    },
+    "views": {
+      "voicomp": [
+        {
+          "id": "voicomp.assistant",
+          "name": "Assistant",
+          "type": "webview"
+        }
+      ]
+    }
+  },
   "dependencies": {
     "zod": "4.4.3"
   },
