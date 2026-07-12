@@ -83,13 +83,16 @@ export function startWebviewController(
 
     const message = parsedMessage.data;
     if (message.type === 'host.error') {
-      if (message.requestId === pendingReadyRequestId) {
+      if (pendingReadyRequestId !== undefined && message.requestId === pendingReadyRequestId) {
         pendingReadyRequestId = undefined;
         statusElement.textContent = message.message;
         return;
       }
 
-      if (message.requestId === pendingConnectionRequestId) {
+      if (
+        pendingConnectionRequestId !== undefined &&
+        message.requestId === pendingConnectionRequestId
+      ) {
         pendingConnectionRequestId = undefined;
         statusElement.textContent = message.message;
         connectionButton.disabled = false;

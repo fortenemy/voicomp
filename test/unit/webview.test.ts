@@ -178,6 +178,89 @@ describe('startWebviewController', () => {
     controller.dispose();
   });
 
+  it('ignores a requestless Host error during startup without consuming the ready request', () => {
+    const { controller } = createHarness();
+
+    dispatchHostMessage({
+      type: 'host.error',
+      code: 'invalid_message',
+      message: 'Requestless startup error must be ignored.',
+    });
+    expect(document.querySelector('#connection-status')?.textContent).toBe(
+      'Starting offline assistant…',
+    );
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(true);
+
+    dispatchHostMessage({
+      type: 'host.initialState',
+      requestId: readyRequestId,
+      sessionId,
+      connection: 'mock_disconnected',
+      transcript: [{ role: 'assistant', text: 'Initial transcript' }],
+    });
+
+    expect(document.querySelector('#connection-status')?.textContent).toBe('Mock disconnected');
+    expect(document.querySelector('#transcript-list')?.textContent).toBe('Initial transcript');
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(false);
+
+    controller.dispose();
+  });
+
+  it('ignores a requestless Host error after initialization', () => {
+    const { controller } = createHarness();
+    dispatchHostMessage({
+      type: 'host.initialState',
+      requestId: readyRequestId,
+      sessionId,
+      connection: 'mock_disconnected',
+      transcript: [{ role: 'assistant', text: 'Initial transcript' }],
+    });
+
+    dispatchHostMessage({
+      type: 'host.error',
+      code: 'invalid_message',
+      message: 'Requestless idle error must be ignored.',
+    });
+
+    expect(document.querySelector('#connection-status')?.textContent).toBe('Mock disconnected');
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(false);
+
+    controller.dispose();
+  });
+
+  it('ignores a requestless Host error while a connection request is pending', () => {
+    const { controller } = createHarness();
+    dispatchHostMessage({
+      type: 'host.initialState',
+      requestId: readyRequestId,
+      sessionId,
+      connection: 'mock_disconnected',
+      transcript: [{ role: 'assistant', text: 'Initial transcript' }],
+    });
+    document.querySelector<HTMLButtonElement>('#connection-check')?.click();
+
+    dispatchHostMessage({
+      type: 'host.error',
+      code: 'invalid_message',
+      message: 'Requestless pending error must be ignored.',
+    });
+
+    expect(document.querySelector('#connection-status')?.textContent).toBe('Mock disconnected');
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(true);
+
+    dispatchHostMessage({
+      type: 'host.connectionCheckResult',
+      requestId: connectionRequestId,
+      sessionId,
+      connection: 'mock_ready',
+    });
+
+    expect(document.querySelector('#connection-status')?.textContent).toBe('Mock ready');
+    expect(document.querySelector<HTMLButtonElement>('#connection-check')?.disabled).toBe(false);
+
+    controller.dispose();
+  });
+
   it('clears a correlated connection error and allows one retry', () => {
     const { controller, postMessage } = createHarness();
     dispatchHostMessage({
