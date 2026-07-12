@@ -28,7 +28,7 @@ their build-plan order and approval gates are satisfied.
 | Boundary | Owner and authority |
 | --- | --- |
 | Webview | Presentation and user intent. In future phases it owns microphone capture, audio playback, WebRTC, and the provider data channel. It never owns the standard API key, workspace APIs, tool execution, approval authorization, or mutations. |
-| Extension Host | Trusted coordinator. In future phases it owns secret storage, standard-key use, ephemeral-secret minting, workspace APIs, context policy, tools, approval gates, and mutations. |
+| Extension Host | Trusted coordinator. In future phases it owns workspace APIs, context policy, tools, approval gates, and mutations. SecretStorage access, standard-key use, and ephemeral-secret minting are allowed only when this extension is running in a supported local Extension Host; a remote Extension Host must fail closed before accepting or retrieving a standard key. |
 | Provider | Untrusted network peer behind a narrow provider interface. Events and tool requests are normalized and runtime-validated. |
 | Workspace | Untrusted paths, content, settings, tasks, and state, accessed only through host policy and VS Code APIs. |
 
@@ -108,7 +108,8 @@ The future contracts are deliberately separate:
 - `SecretStore` exposes only get, set, and delete operations for named extension
   secrets backed by `ExtensionContext.secrets`. Phase 3 uses it for the standard
   API key; values are never enumerable, mirrored into settings, or returned to
-  the Webview.
+  the Webview. Its policy wrapper denies standard-key get and set operations when
+  `vscode.env.remoteName` is defined; delete may remain available without a read.
 - `SettingsStore` exposes runtime-validated reads and change subscriptions for
   namespaced, non-secret VS Code configuration. Invalid values produce a safe
   default or explicit validation failure according to the setting contract;
@@ -152,13 +153,16 @@ and transcript → Webview validates and renders. A user connection check follow
 same correlated request/result path. Invalid messages are rejected without logging
 payloads.
 
-Future voice: user starts session → host reads the standard key from SecretStorage
-and transmits it over authenticated HTTPS to OpenAI solely to call
+Future voice in a supported local window: host verifies that
+`vscode.env.remoteName` is undefined → user starts session → host reads the
+standard key from SecretStorage and transmits it over authenticated HTTPS to OpenAI solely to call
 `POST /v1/realtime/client_secrets` → only the returned short-lived secret and
 bounded session config cross to the Webview → Webview opens
 microphone/WebRTC/data channel → normalized events cross typed messages → host
 executes any allowed tool → bounded result returns to the provider path. Stop or
-expiry clears transient credentials and media.
+expiry clears transient credentials and media. In a remote window, API-key setup,
+key retrieval, client-secret minting, and live provider sessions return an explicit
+unsupported outcome before any secret access.
 
 Future context: request → workspace trust/root/URI checks → sensitive and binary
 filter → configurable per-item and total context budget → normalized result. Limits
@@ -167,9 +171,10 @@ omission are explicit; the repository is never uploaded automatically.
 
 ## Security invariants
 
-- Standard API keys are retained only in SecretStorage and trusted host memory and
-  are transmitted over authenticated HTTPS to OpenAI solely to mint a client
-  secret; no key, short-lived secret, source, transcript, or audio is logged.
+- Standard API keys are retained only in SecretStorage and supported local host
+  memory and are transmitted over authenticated HTTPS to OpenAI solely to mint a
+  client secret. A remote Extension Host never accepts or retrieves the key; no
+  key, short-lived secret, source, transcript, or audio is logged.
 - Cross-boundary values start as `unknown` and pass strict, bounded runtime schemas.
 - Workspace access is root-bound, URI-aware, trust-gated, filtered, and budgeted.
 - Tools declare a risk level: read-only, sensitive/broad read, proposal, mutation,
@@ -202,7 +207,10 @@ policy, tool risk, approval expiry/reuse/digest binding, and cancellation. Adapt
 contract tests use a deterministic mock provider, fake clocks, fake SecretStorage,
 and synthetic multi-root/URI fixtures. Webview tests cover safe rendering, message
 correlation, CSP, nonce, and disposal. Official VS Code Extension Host tests cover
-activation, registrations, trust behavior, workspace adapters, edits, and cleanup.
+activation, registrations, trust behavior, workspace adapters, edits, cleanup, and
+the `vscode.env.remoteName` fail-closed credential guard. Tests must prove that a
+remote window cannot invoke key setup or cause SecretStorage `get`, client-secret
+minting, or live-session startup.
 Real provider, microphone, remote, and Cursor checks are explicit smoke tests only
 in their authorized phases, never default credential-dependent CI.
 
@@ -233,6 +241,12 @@ there is no implicit first root. Root changes cancel affected work and invalidat
 approvals. Remote Webview and Extension Host runtimes may not share a filesystem,
 OS, environment, or loopback. Use `workspace.fs` and capability-aware adapters;
 unsupported schemes or local-process operations return unavailable explicitly.
+The Phase 1 manifest keeps the single extension workspace-capable with
+`"extensionKind": ["workspace"]`. When that places Voicomp in a remote Extension
+Host, offline and capability-supported workspace features may run, but standard-key
+setup and retrieval, client-secret minting, and live provider sessions are blocked.
+A future local credential/UI broker plus remote workspace helper requires a new
+ADR, threat and privacy review, tests, and explicit authorization.
 
 ## Sources
 

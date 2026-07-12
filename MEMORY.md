@@ -2,9 +2,9 @@
 
 ## Current Position
 
-- All 19 Phase 0 master tasks are complete. Boundary verification, memory, log,
-  commit, GitHub synchronization, and remote readback remain in progress until
-  the Phase 0 boundary is pushed and verified.
+- All 19 Phase 0 master tasks are complete and the initial closure is committed
+  locally. Final-review corrections, GitHub synchronization, and remote readback
+  remain in progress.
 - Phase 1 has not started.
 - Authoritative task cursor: `docs/BUILD_PLAN.md`.
 - Authoritative roadmap state: 265 total tasks, 19 checked in Phase 0, and zero
@@ -16,8 +16,9 @@
 - Workspace: `D:\projekty AI\voice_project_companion`.
 - GitHub: https://github.com/fortenemy/voicomp
 - Branch: local `main`, tracking `origin/main`.
-- Before the Phase 0 boundary commit, local `main` is 10 commits ahead of
-  `origin/main`; no local Phase 0 commit has been pushed.
+- Phase 0 history is committed locally. At the last remote readback,
+  `origin/main` still contained only the initial MIT commit; synchronization is
+  pending and must remain a normal fast-forward.
 - Remote commit `0fb01b72e031d8c0e34607770bc717c475945ccb` contains the
   authoritative MIT license. Local history was reconciled onto that commit
   without force or parallel ancestry.
@@ -37,12 +38,19 @@
   phase or session boundary.
 - Use Node.js 24 LTS, `engines.vscode` `^1.95.0`, and
   `@types/vscode` pinned to `1.95.x`.
+- The official Node.js 24 LTS patch observed on 2026-07-12 is `v24.18.0`;
+  the local `v24.9.0` runtime must be updated before lockfile generation.
 - Secrets, workspace authority, tools, and mutations stay in the Extension
   Host; the Webview owns browser media and UI only. Cross-boundary data requires
   runtime validation, and mutations require explicit approval.
 - Phase 1 is offline. Phase 3 will use an Extension Host-minted short-lived
   Realtime client secret and WebRTC, preferring `@openai/agents/realtime`
   behind the provider abstraction.
+- Keep the single extension workspace-capable. In a remote window, detected by
+  `vscode.env.remoteName`, Voicomp must not accept, retrieve, or transmit the
+  standard API key, mint a client secret, or start a live provider session.
+  Remote workspace features remain capability-aware; a future local credential
+  broker plus remote workspace helper requires a separate approved design.
 - Cursor compatibility is a manual test target, not an assumed guarantee.
 
 ## Verified Environment
@@ -75,15 +83,17 @@
 
 ## Last Completed Boundary
 
-- Latest completed committed boundary: Task 3 review resolution in `93095ab`.
-  The Phase 0 decision series is `3116d74`, `4f81090`, `c11a3da`,
+- Commit `665b397` records the initial Phase 0 closure boundary. The Phase 0
+  decision series before that boundary is `3116d74`, `4f81090`, `c11a3da`,
   `bb8b840`, `a0fd969`, `9c7032c`, and `93095ab`.
 - The initial Task 3 review had four Important findings covering phase-status
   wording, standard-key transfer disclosure, categorical logging prohibition,
   and future Tool Registry/Storage contracts; the re-review after `93095ab`
   was clean.
-- All Phase 0 master tasks are complete. The current boundary bookkeeping is
-  staged but not committed or pushed, and Phase 1 remains unopened.
+- The whole-branch review after `665b397` found stale snapshot wording, an
+  unresolved remote-credential boundary, a missing provider/billing human
+  action, and stale Node patch evidence. This snapshot incorporates those
+  corrections. GitHub synchronization remains pending, and Phase 1 is unopened.
 
 ## Next Unchecked Task
 

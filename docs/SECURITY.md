@@ -6,7 +6,9 @@ Voicomp is an MIT-licensed VS Code extension intended to provide a real-time voi
 assistant with controlled access to the active workspace. This document is the
 repository-wide security model and disclosure policy.
 
-All 19 Phase 0 master tasks are complete. Phase 0 boundary verification/memory/log/GitHub synchronization is in progress. Phase 1 has not started.
+All 19 Phase 0 master tasks are complete and the initial closure is committed
+locally. Final-review corrections and GitHub synchronization are in progress.
+Phase 1 has not started.
 
 The repository contains documentation only: no extension runtime, Webview,
 provider connection, microphone path, workspace tool, approval gate, or security
@@ -41,14 +43,17 @@ The Webview is an untrusted presentation boundary. It may express user intent an
 in a future phase, handle microphone, playback, WebRTC, and the provider data
 channel. It cannot call VS Code APIs directly and never owns the standard API key,
 workspace access, tool execution, approvals, or mutations. The Extension Host is
-the trusted coordinator and future owner of SecretStorage, standard-key use,
-ephemeral-secret minting, workspace policy, tools, approval enforcement, and
-mutations. The workspace and provider remain untrusted even after one message or
-event has passed another boundary.
+the trusted coordinator for workspace policy, tools, approval enforcement, and
+mutations. SecretStorage retrieval, standard-key use, and ephemeral-secret minting
+are permitted only in a supported local Extension Host. A remote Extension Host
+must reject key setup, key retrieval, minting, and live sessions before secret
+access. The workspace and provider remain untrusted even after one message or event
+has passed another boundary.
 
 ## Phase 1 controls
 
-Phase 1 must remain local and offline. Direction-specific Zod schemas validate
+Phase 1 must remain provider-free and offline, with no external network request.
+Direction-specific Zod schemas validate
 both Webview-to-host and host-to-Webview messages at runtime; values begin as
 `unknown`, discriminated unions reject unknown variants, fields are bounded, and
 invalid payloads are rejected without logging their contents. Correlation and
@@ -114,7 +119,7 @@ collection; omissions and truncation are visible.
 
 Voicomp is bring-your-own-key. In Phase 3, the standard OpenAI API key will be
 accepted through a dedicated command, stored only with
-`ExtensionContext.secrets`, retained only in trusted Extension Host local memory,
+`ExtensionContext.secrets`, retained only in supported local Extension Host memory,
 and transmitted over authenticated HTTPS to OpenAI solely to call
 `POST /v1/realtime/client_secrets`. The Webview never receives the standard key.
 The host may pass only the returned short-lived client secret plus a bounded
@@ -125,6 +130,16 @@ Secrets must not appear in source, settings files, command arguments, errors,
 logs, telemetry, transcripts, test fixtures, build artifacts, or packaged VSIX
 contents. Voicomp contains no bundled credentials. Clearing the key must remove it
 from SecretStorage and terminate sessions that depend on it.
+
+The implementation must check `vscode.env.remoteName` before presenting or
+accepting the Set OpenAI API Key flow and before every SecretStorage `get`, client-
+secret request, or live-session transition. A defined value fails closed with a
+sanitized unsupported-state message. Clear OpenAI API Key may call only
+SecretStorage deletion and must not retrieve the value. Tests must use a fake
+remote environment and spy SecretStorage/provider adapters to prove that forbidden
+calls do not occur. Offline and read-only remote workspace features may use
+capability-aware VS Code APIs; unsupported local-process, Git, or terminal features
+must fail visibly.
 
 ## Logging/redaction/privacy
 
@@ -202,6 +217,11 @@ model behavior, editor vulnerabilities, compromised dependencies, malicious
 extensions, operating-system compromise, and microphone permission behavior are
 outside Voicomp's full control. Remote and Cursor behavior may differ from VS Code
 and requires recorded testing before compatibility claims.
+
+Live BYOK sessions are not supported while Voicomp runs in a remote Extension Host.
+A future split between a local credential broker and a remote workspace helper
+would introduce a new authenticated boundary and is forbidden until a separate ADR,
+threat model, privacy review, tests, and human authorization exist.
 
 SecretStorage protects against accidental disclosure but cannot defend a fully
 compromised Extension Host or user account. Path and symlink behavior varies by

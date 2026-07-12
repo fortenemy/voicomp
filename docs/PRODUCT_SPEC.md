@@ -136,13 +136,16 @@ that functional boundary but remain required for the complete project.
 
 ### Secure user-provided authentication
 
-- The user supplies their own provider API key through a secure editor flow.
+- In a supported local Extension Host, the user supplies their own provider API
+  key through a secure editor flow.
 - The standard API key is stored persistently only through VS Code secret
   storage.
 - The standard API key never enters Webview state, logs, diagnostics, source
   control, packaged files, or transcripts.
-- The Extension Host obtains any short-lived browser credential required for a
-  live session and exposes only that limited credential to the Webview.
+- A supported local Extension Host obtains any short-lived browser credential
+  required for a live session and exposes only that limited credential to the
+  Webview. Remote Extension Hosts block key setup and retrieval, client-secret
+  minting, and live provider sessions before secret access.
 - Users can clear the stored secret through an explicit command.
 - A hosted subscription backend may be designed for later use, but it is not
   part of the first functional MVP.
@@ -324,7 +327,8 @@ scope.
   tools, run commands, or mutate the project.
 - The Extension Host owns editor API access, secret storage, context retrieval,
   tool execution, path and trust checks, approvals, mutations, and sanitized
-  logging.
+  logging. Standard-key use and client-secret minting are restricted to a
+  supported local Extension Host.
 - Provider-specific conversation code remains separated from generic session,
   tool, context, and approval behavior.
 - Every external event, tool argument, provider payload, and Webview/Extension
@@ -335,8 +339,9 @@ scope.
 ### Untrusted workspaces
 
 When the workspace is not trusted, Voicomp may open the sidebar, explain its
-capabilities, support secure key configuration, and, if the policy permits,
-operate on text the user explicitly selected. It must disable broad workspace
+capabilities, support secure key configuration only in a supported local
+Extension Host, and, if the policy permits, operate on text the user explicitly
+selected. It must disable broad workspace
 scanning, file changes, Git mutation, terminal commands, task execution, and
 automatic tool actions. The UI must explain the restriction clearly.
 
@@ -415,7 +420,8 @@ After this evidence is reported, the mandatory Phase 1 stop applies.
 The functional MVP is done only when a test or documented manual check proves
 that:
 
-- a user can start and stop a live voice session;
+- in a supported local environment, a user can start and stop a live voice
+  session; remote live-BYOK limitations are reported explicitly;
 - the user hears the assistant, sees partial and final transcripts, and can
   interrupt assistant speech;
 - active selection, active file, file reading, search, manifests, workspace
@@ -425,8 +431,8 @@ that:
 - sensitive, binary, oversized, outside-workspace, and unsupported content is
   blocked or handled through the declared safe flow;
 - the standard API key is persisted only in secret storage, retained only in
-  trusted Extension Host local memory while needed, and never enters the
-  Webview, logs, package, or repository;
+  supported local Extension Host memory while needed, and never enters a remote
+  Extension Host, the Webview, logs, package, or repository;
 - untrusted workspaces disable broad reads and dangerous actions;
 - an edit proposal shows the exact diff, rejection changes nothing, stale
   approval fails, and an approved edit uses controlled workspace editing with

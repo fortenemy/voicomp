@@ -27,20 +27,29 @@ bring-your-own-key model without bundling a publisher-owned credential.
 ## Decision
 
 Future Phase 3 will implement `Voicomp: Set OpenAI API Key` as a dedicated secure VS
-Code command. The command will collect the standard key through a masked editor input
-flow and send it only to trusted Extension Host code. The Host will store the value
+Code command in a supported local Extension Host. The command will collect the
+standard key through a masked editor input flow and send it only to that local Host.
+The Host will store the value
 only in `ExtensionContext.secrets`. It will not mirror the key into user or workspace
 settings, Webview state, global state, environment files, diagnostics, telemetry, test
 fixtures, or logs.
 
 When the user starts a Realtime session, the Extension Host will retrieve the standard
 key into local memory and transmit it over authenticated HTTPS to OpenAI solely to call
-`POST /v1/realtime/client_secrets`. The key is retained only in trusted Extension Host
-SecretStorage and local memory; it never enters the Webview, settings, logs,
+`POST /v1/realtime/client_secrets`. The key is retained only in SecretStorage and
+supported local Extension Host memory; it never enters the Webview, settings, logs,
 diagnostics, source control, or packaged assets. The Host passes only the returned
 short-lived ephemeral secret plus bounded session configuration to the Webview and
 must sanitize failures before displaying or logging them. The key is never made
 available to workspace tools.
+
+The single extension remains workspace-capable. Before presenting or accepting key
+setup and before every SecretStorage `get`, client-secret request, or live-session
+transition, the Host must check `vscode.env.remoteName`. When it is defined, the
+operation fails closed with an explicit sanitized unsupported-state message; the
+standard key must not enter the remote Extension Host. `Clear OpenAI API Key` may
+remain available if it performs deletion without retrieving the value. Offline and
+capability-supported remote workspace features are independent of live BYOK.
 
 Future Phase 3 will also implement `Voicomp: Clear OpenAI API Key`. Clearing deletes
 the value from SecretStorage, terminates sessions that depend on it, invalidates
@@ -64,6 +73,11 @@ machine because SecretStorage is not synchronized. Platform secret storage canno
 protect against a compromised user account, operating system, Extension Host, or editor.
 Authentication errors need clear, sanitized recovery guidance.
 
+Live BYOK is unavailable when the extension runs remotely. Supporting it later
+requires a local credential/UI broker and a remote workspace helper, creating a new
+authenticated boundary that needs its own ADR, threat model, privacy disclosure,
+tests, and human authorization.
+
 ## Rejected Alternatives
 
 A publisher-owned key embedded in the extension is rejected because it would be
@@ -72,12 +86,15 @@ Settings JSON, workspace files, environment files, global state, and Webview per
 are rejected because they increase disclosure or synchronization risk. Sending the
 standard key directly to OpenAI from the Webview is rejected because the Webview is not
 the credential trust domain. Building a hosted proxy now is rejected as unnecessary
-scope and a materially different privacy and security model.
+scope and a materially different privacy and security model. Forcing the single
+extension to run only as a UI extension is rejected because it would materially
+constrain workspace-hosted tools and still would not define the authenticated split
+needed for full remote live support.
 
 ## Security and Privacy Impact
 
-The standard key is retained only in trusted Extension Host SecretStorage and local
-memory, but it is transmitted over authenticated HTTPS to OpenAI solely to call
+The standard key is retained only in SecretStorage and supported local Extension
+Host memory, but it is transmitted over authenticated HTTPS to OpenAI solely to call
 `POST /v1/realtime/client_secrets`. It never enters the Webview, settings, or logs;
 only the returned short-lived client secret crosses to the Webview. Logs and
 diagnostics must use allowlisted metadata and never include credentials, headers,
@@ -85,6 +102,8 @@ request bodies, provider payloads, source content, transcripts, or audio. Secret
 clearing and session disposal must be deterministic and testable. BYOK does not
 eliminate provider processing: users must receive accurate disclosure of what audio,
 conversation, and bounded workspace context OpenAI receives during a live session.
+Tests must prove that a defined `vscode.env.remoteName` prevents key input,
+SecretStorage retrieval, client-secret requests, and live-session startup.
 
 ## Sources
 
@@ -97,5 +116,9 @@ Official sources checked 2026-07-12:
   — extension-owned encrypted secret storage and deletion semantics.
 - [VS Code common extension capabilities](https://code.visualstudio.com/api/extension-capabilities/common-capabilities)
   — SecretStorage behavior for desktop extensions.
+- [VS Code Extension Host](https://code.visualstudio.com/api/advanced-topics/extension-host)
+  — local and remote hosts and manifest placement.
+- [VS Code remote extension guidance](https://code.visualstudio.com/api/advanced-topics/remote-extensions)
+  — workspace-extension placement and remote constraints.
 - [OpenAI Realtime API with WebRTC](https://developers.openai.com/api/docs/guides/realtime-webrtc)
   — standard-key server boundary and ephemeral client-secret browser flow.

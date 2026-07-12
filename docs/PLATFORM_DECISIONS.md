@@ -15,8 +15,8 @@ publication. Time-sensitive external facts must be rechecked at the triggers bel
 ### Development runtime
 
 - Use Node.js 24 LTS as the development line.
-- The latest official Node.js page observed during this verification identified
-  `v24.17.0` as the current Node.js 24 LTS patch.
+- The official `latest-v24.x` release observed during this verification is
+  `v24.18.0`, released on 2026-06-23, and is the current Node.js 24 LTS patch.
 - The local runtime is `v24.9.0`. It is on the selected major line, but it must be
   updated to the then-current Node.js 24 LTS patch before Phase 1 generates the
   dependency lockfile.
@@ -32,6 +32,25 @@ publication. Time-sensitive external facts must be rechecked at the triggers bel
 - Pin `@types/vscode` to `1.95.x` in Phase 1. Do not use a range that admits newer
   minor API declarations, because compiling against newer declarations could
   accidentally introduce an API unavailable at the declared engine floor.
+
+### Remote workspace placement and BYOK
+
+- Keep the single extension workspace-capable and declare
+  `"extensionKind": ["workspace"]` in the Phase 1 manifest. This lets VS Code run
+  it with the workspace and route supported workspace operations through stable
+  APIs.
+- When `vscode.env.remoteName` is defined, Voicomp must reject API-key setup,
+  standard-key retrieval, Realtime client-secret minting, and live provider
+  sessions with an explicit unsupported-state message. Clearing an existing
+  SecretStorage entry may remain available because it does not retrieve the
+  value.
+- Offline and read-only remote features may use explicit `vscode.Uri` values,
+  `vscode.workspace.fs`, and capability-aware adapters. Local-process, Git, and
+  terminal capabilities must report unavailable when the active host cannot
+  provide them safely.
+- A future local credential/UI broker plus remote workspace helper is a separate
+  architecture requiring a new ADR, threat and privacy review, tests, and human
+  authorization. It is not part of the current MVP.
 
 ### Future OpenAI Realtime transport
 
@@ -85,8 +104,9 @@ publication. Time-sensitive external facts must be rechecked at the triggers bel
 
 | Decision | Evidence verified on 2026-07-12 |
 | --- | --- |
-| Node.js development line | The official releases page marks Node.js 24 (`Krypton`) as LTS and the official download page observed for this decision showed `v24.17.0` as Latest LTS; `node --version` returned `v24.9.0`. |
+| Node.js development line | The official releases page marks Node.js 24 (`Krypton`) as LTS and the official `latest-v24.x` release observed for this decision is `v24.18.0`; `node --version` returned `v24.9.0`. |
 | VS Code engine and type floor | The official manifest requires a non-wildcard `engines.vscode` compatibility declaration; the Webview and testing guides document the stable Phase 1 surface. `code --version` returned `1.127.0`, which verifies the local test environment but does not change the `^1.95.0` support floor. |
+| Remote workspace and BYOK | The official Extension Host guide distinguishes local and remote hosts and documents `extensionKind`; the remote-extension guide documents workspace-host placement, while the API reference documents `vscode.env.remoteName`, `SecretStorage`, and remote-capable `workspace.fs`. The fail-closed BYOK restriction prevents the standard key from entering a remote Extension Host. |
 | Realtime connection and SDK preference | The OpenAI WebRTC guide documents browser WebRTC and `POST /v1/realtime/client_secrets`; the Agents SDK guides document ephemeral client tokens, `@openai/agents/realtime`, and WebRTC as the default browser transport. ADR 0002 records the project boundary. |
 | Cursor assumption | `cursor --version` returned `3.10.20`; Cursor's migration guide describes its VS Code base while noting version differences. No VSIX exists yet, so compatibility is intentionally unverified. |
 | Package identifier availability | A direct request to the VS Code Marketplace target page returned HTTP `404`; a direct request to the Open VSX API returned HTTP `404` and `Extension not found: fortenemy.voicomp`. |
@@ -102,8 +122,9 @@ recorded in [the product specification](./PRODUCT_SPEC.md),
 - Before Phase 1 installs dependencies or generates `package-lock.json`, recheck
   the current Node.js 24 LTS patch and update the local runtime.
 - When Phase 1 creates `package.json`, verify `engines.vscode` is `^1.95.0` and
-  `@types/vscode` is pinned to `1.95.x`; run the official Extension Host tests
-  against the declared floor as well as the normal supported test target.
+  `@types/vscode` is pinned to `1.95.x`, and declare
+  `"extensionKind": ["workspace"]`; run the official Extension Host tests against
+  the declared floor as well as the normal supported test target.
 - Before Phase 3 implementation, recheck the Realtime client-secret endpoint,
   Agents SDK package and transport behavior, ephemeral-secret semantics, current
   supported models and voices, and browser Content Security Policy requirements.
@@ -121,8 +142,11 @@ recorded in [the product specification](./PRODUCT_SPEC.md),
 Official sources checked 2026-07-12:
 
 - [Node.js releases](https://nodejs.org/en/about/previous-releases)
-- [Node.js v24.17.0 LTS release](https://nodejs.org/en/blog/release/v24.17.0)
+- [Node.js v24.18.0 LTS release](https://nodejs.org/en/blog/release/v24.18.0)
 - [VS Code extension manifest](https://code.visualstudio.com/api/references/extension-manifest)
+- [VS Code Extension Host](https://code.visualstudio.com/api/advanced-topics/extension-host)
+- [VS Code remote extensions](https://code.visualstudio.com/api/advanced-topics/remote-extensions)
+- [VS Code API reference](https://code.visualstudio.com/api/references/vscode-api)
 - [VS Code Webview API](https://code.visualstudio.com/api/extension-guides/webview)
 - [VS Code testing extensions](https://code.visualstudio.com/api/working-with-extensions/testing-extension)
 - [OpenAI Realtime API with WebRTC](https://developers.openai.com/api/docs/guides/realtime-webrtc)

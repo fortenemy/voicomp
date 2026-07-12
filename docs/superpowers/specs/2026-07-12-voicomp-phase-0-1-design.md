@@ -1,6 +1,6 @@
 # Voicomp Phase 0-1 Design
 
-**Status:** Approved direction, pending written-spec review
+**Status:** Approved Phase 0 decision input; Phase 1 has not started
 
 **Date:** 2026-07-12
 

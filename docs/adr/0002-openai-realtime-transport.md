@@ -15,8 +15,9 @@ contain no OpenAI dependency, network call, credential collection, or live audio
 Voicomp needs a low-latency browser voice transport without exposing the user's
 standard OpenAI API key to the Webview. OpenAI documents WebRTC as the browser path
 and supports short-lived client secrets minted with a standard key by a trusted
-server-side component. In Voicomp, the Extension Host fills that trusted role and the
-Webview is the browser client.
+server-side component. In Voicomp, a supported local Extension Host fills that role
+and the Webview is the browser client. ADR 0003 requires live BYOK to fail closed
+when the extension runs in a remote Extension Host.
 
 The transport choice must preserve Voicomp's provider abstraction. Conversation state,
 tool policy, workspace context, approvals, and mutations cannot become dependent on raw
@@ -25,7 +26,8 @@ the architecture must not freeze a transient default in this Phase 0 record.
 
 ## Decision
 
-In future Phase 3, the Extension Host will read the user's standard BYOK key and call
+In future Phase 3, a supported local Extension Host will verify that
+`vscode.env.remoteName` is undefined, read the user's standard BYOK key, and call
 `POST /v1/realtime/client_secrets` with a bounded session configuration. It will pass
 only the returned short-lived ephemeral client secret and approved session settings to
 the Webview. The standard key never crosses that boundary.
@@ -55,7 +57,8 @@ interface limits vendor coupling and preserves a deterministic mock provider.
 The design adds a client-secret request, expiry handling, reconnect behavior, strict
 cross-boundary schemas, and SDK dependency review. A session cannot begin offline or
 without a valid user key. SDK and endpoint behavior must be revalidated before
-implementation; this ADR does not authorize Phase 3 work early.
+implementation; a remote Extension Host cannot start a live BYOK session. This ADR
+does not authorize Phase 3 work early.
 
 ## Rejected Alternatives
 
@@ -74,6 +77,8 @@ be discarded on stop, expiry, reload, or disposal. Standard keys, ephemeral secr
 authorization headers, raw provider payloads, microphone audio, transcripts, and source
 content must not be logged. Microphone capture occurs only after a user-started session
 and platform permission. Provider-bound context remains visible, filtered, and bounded.
+Key setup, SecretStorage retrieval, client-secret minting, and live-session startup
+must be blocked before secret access whenever `vscode.env.remoteName` is defined.
 
 ## Sources
 

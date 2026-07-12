@@ -17,10 +17,11 @@ or permission to implement it early.
 This document describes Voicomp's intended data boundaries. Applicable editor,
 provider, operating-system, and remote-workspace terms also apply.
 
-## Current Phase 1 offline data flow
+## Planned Phase 1 offline data flow
 
-**Future Phase 1 requirement:** Phase 1 will remain local and offline. A sidebar
-Webview will send small, runtime-validated UI messages to the Extension Host. The
+**Future Phase 1 requirement:** Phase 1 will remain provider-free and offline,
+with no external network request. A sidebar Webview will send small,
+runtime-validated UI messages to the Extension Host. The
 Extension Host will return mock connection state, a mock transcript entry, and
 sanitized errors through the same editor-controlled message boundary.
 
@@ -34,13 +35,19 @@ recording or transcript of the user.
 ## Future BYOK OpenAI flow
 
 **Future Phase 3 requirement:** Voicomp will use a bring-your-own-key flow. The
-user will enter a standard OpenAI API key through a dedicated editor command. The
-standard API key will be retained only in trusted Extension Host
-`ExtensionContext.secrets` storage and local memory. For a user-started Realtime
-session, the Extension Host will transmit it over authenticated HTTPS to OpenAI
+user will enter a standard OpenAI API key through a dedicated editor command only
+when Voicomp runs in a supported local Extension Host. The standard API key will
+be retained only in `ExtensionContext.secrets` storage and supported local host
+memory. For a user-started Realtime session, that local Extension Host will
+transmit it over authenticated HTTPS to OpenAI
 solely to call `POST /v1/realtime/client_secrets`. The standard key will never
 enter the Webview, settings, logs, transcripts, source control, or the packaged
 extension.
+
+When `vscode.env.remoteName` is defined, Voicomp will not offer or accept key
+setup, retrieve a stored key, request a client secret, or start a live provider
+session. It will show an explicit unsupported state before secret access. Clearing
+an existing SecretStorage entry may remain available without reading its value.
 
 OpenAI will return a short-lived client secret. Only that ephemeral secret and a
 bounded session configuration will enter the Webview. The Webview may then
@@ -76,7 +83,7 @@ Phase 1 will remain offline.
 
 | Category | Future condition for transfer | Destination and limit |
 | --- | --- | --- |
-| Standard OpenAI API key | The user starts a Realtime session and the Extension Host requests a short-lived client secret | Retained only in trusted Extension Host SecretStorage and local memory; transmitted over authenticated HTTPS to OpenAI solely to call `POST /v1/realtime/client_secrets`; never enters the Webview, settings, or logs |
+| Standard OpenAI API key | In a supported local window, the user starts a Realtime session and the Extension Host requests a short-lived client secret; key setup and use are blocked when `vscode.env.remoteName` is defined | Retained only in SecretStorage and supported local Extension Host memory; transmitted over authenticated HTTPS to OpenAI solely to call `POST /v1/realtime/client_secrets`; never enters a remote Extension Host, the Webview, settings, or logs |
 | Microphone audio | The user starts a live session and grants microphone access | OpenAI Realtime over the authorized WebRTC session; Voicomp will not log or persist source audio |
 | Transcript or typed conversation | The user participates in a live provider session | OpenAI receives the conversation events needed for that session; local persistence remains off by default |
 | Workspace content | The user selects content or the active request triggers an allowed, visible, bounded read-only tool | OpenAI receives only the context identified for that request, subject to trust, sensitivity, type, size, line, result-count, and total-context limits |
@@ -105,6 +112,11 @@ There is no current Voicomp storage. **Future requirement:** the standard API ke
 will be the only required persistent secret and will use VS Code SecretStorage,
 which VS Code documents as encrypted and not synchronized across machines. It
 cannot protect a compromised user account or Extension Host.
+
+SecretStorage is client-backed, but a workspace extension running remotely can
+request a stored value. Voicomp therefore prohibits key setup and retrieval from a
+remote Extension Host instead of treating encrypted storage as proof of credential
+locality.
 
 Future live session state, ephemeral secrets, and transcripts will remain in
 memory and will be cleared on session disposal. Transcript persistence will be
@@ -197,6 +209,16 @@ will use `vscode.Uri` and capability-aware VS Code APIs. Context stored on a
 remote workspace can leave that environment only through the same visible,
 filtered, bounded provider flow. Unsupported schemes will fail visibly.
 
+The single extension remains workspace-capable so offline and supported read-only
+workspace features can run with the workspace. However, while
+`vscode.env.remoteName` is defined, Voicomp blocks standard-key setup and
+retrieval, client-secret minting, and live provider sessions; the standard key is
+not transferred into the remote Extension Host. Local-process, Git, and terminal
+features may be reported unavailable. VS Code for the Web/Codespaces configurations
+without a supported local Node Extension Host have no live BYOK mode. Supporting
+live voice across a future local credential broker and remote workspace helper
+requires a separate ADR, security and privacy review, tests, and authorization.
+
 ## Human and legal review
 
 This engineering record is not legal advice or a final consumer privacy notice.
@@ -223,5 +245,9 @@ Official sources checked 2026-07-12:
   — Webview isolation, message passing, security, and persistence.
 - [VS Code remote extension guidance](https://code.visualstudio.com/api/advanced-topics/remote-extensions)
   — remote runtime separation, SecretStorage, and Webview messaging.
+- [VS Code Extension Host](https://code.visualstudio.com/api/advanced-topics/extension-host)
+  — local and remote host placement and `extensionKind` behavior.
+- [VS Code API reference](https://code.visualstudio.com/api/references/vscode-api)
+  — `vscode.env.remoteName`, SecretStorage, and remote-capable `workspace.fs`.
 - [Cursor migration from VS Code](https://docs.cursor.com/get-started/migrate-from-vs-code)
   — VS Code-based migration, extension import, and version differences.

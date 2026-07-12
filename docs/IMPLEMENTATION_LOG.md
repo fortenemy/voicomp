@@ -187,3 +187,60 @@ the exact next unchecked task. Corrections must be added as a new dated note.
 ### Next unchecked task
 
 `Create a TypeScript VS Code extension manifest`.
+
+## 2026-07-12 — Phase 0 whole-branch review corrections
+
+### Review result and scope
+
+- Commit `665b397` created the initial Phase 0 closure boundary. A subsequent
+  independent whole-branch review found no Critical issues, three Important
+  documentation issues, and one Minor time-sensitive evidence issue.
+- The findings were stale current-state snapshots, an unresolved standard-key
+  boundary for remote Extension Hosts, a missing human action for OpenAI provider
+  credentials and billable tests, and stale Node.js 24 patch evidence.
+- This correction remains documentation-only. It does not add production code,
+  collect a credential, call OpenAI, install a dependency, package a VSIX, publish
+  an extension, or change the physical workspace path or MIT license.
+
+### Corrections
+
+- Refreshed `README.md`, `MEMORY.md`, the Phase 0 notes in
+  `docs/BUILD_PLAN.md`, and the approved design status to recognize the committed
+  `665b397` closure while keeping Phase 1 unopened.
+- Kept the single extension workspace-capable, but defined a fail-closed remote
+  BYOK policy: when `vscode.env.remoteName` is defined, Voicomp must block API-key
+  setup and retrieval, Realtime client-secret minting, and live provider sessions
+  before secret access. Clear-key deletion may remain available without retrieval.
+- Recorded that offline and capability-supported remote workspace operations may
+  use explicit `vscode.Uri` values and `vscode.workspace.fs`; unsupported local
+  processes, Git, and terminal capabilities fail visibly. A future local broker
+  plus remote helper requires a new ADR, threat/privacy review, tests, and human
+  authorization.
+- Added the open human action for selecting an OpenAI account/project, supplying
+  BYOK only through the implemented secure product flow, and explicitly
+  authorizing billable Phase 3 live-provider tests.
+- Updated the dated official Node.js 24 LTS evidence from `v24.17.0` to
+  `v24.18.0`, released on 2026-06-23. The observed local runtime remains
+  `v24.9.0` and still requires updating before lockfile generation.
+
+### External and repository evidence
+
+- Official Node.js `latest-v24.x` and release sources identify `v24.18.0` as the
+  current Node.js 24 LTS patch on the verification date.
+- Official VS Code Extension Host, remote-extension, and API references document
+  local/remote host placement, `extensionKind`, `vscode.env.remoteName`,
+  SecretStorage, and remote-capable `workspace.fs`.
+- GitHub connector readback showed `fortenemy/voicomp` is accessible with push
+  permission and remote `main` still points to the initial MIT commit
+  `0fb01b72e031d8c0e34607770bc717c475945ccb`; no conflicting remote commit was
+  observed and no remote mutation occurred during this correction.
+
+### Remaining boundary work
+
+- Rerun roadmap counts, stale-wording, naming, link, credential-pattern,
+  whitespace, and Git branch-state checks; obtain a clean re-review; commit the
+  correction; then perform a normal fast-forward GitHub synchronization and
+  remote readback.
+- Phase 1 remains unopened. The next master task is:
+
+`Create a TypeScript VS Code extension manifest`.

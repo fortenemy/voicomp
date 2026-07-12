@@ -6,9 +6,10 @@ projects.
 
 ## Current status
 
-The project is in Phase 0: repository initialization and architectural decision
-records. No OpenAI connection, microphone capture, workspace tools, file edits,
-or terminal actions are implemented yet.
+Phase 0 repository initialization and architectural decision records are
+complete. Phase 1 is the next implementation phase and has not started. No
+OpenAI connection, microphone capture, workspace tools, file edits, or terminal
+actions are implemented yet.
 
 The first implementation milestone will provide an offline, installable VSIX
 with an Activity Bar container, a secure sidebar Webview, typed message passing,

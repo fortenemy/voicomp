@@ -34,6 +34,14 @@ mechanism.
 - [ ] Generate an Open VSX access token and store it only in an approved secret
   mechanism.
 
+### OpenAI provider access and billable testing
+
+- [ ] Before Phase 3 live-provider testing, select the OpenAI account and
+  project, supply the user's BYOK API key only through Voicomp's implemented
+  secure product flow, and explicitly authorize billable tests. Do not place the
+  key in this repository, documentation, logs, chat, fixtures, or environment
+  files.
+
 ### Publication approvals
 
 - [ ] Approve the final VS Code Marketplace publication after reviewing the
