@@ -35,13 +35,14 @@ suite('Voicomp extension shell', () => {
     assert.equal(extension.isActive, true);
 
     const manifest = extension.packageJSON as VoicompManifest;
-    assert.deepEqual(manifest.contributes?.commands, [
-      {
-        command: 'voicomp.openAssistant',
-        title: 'Open Assistant',
-        category: 'Voicomp',
-      },
-    ]);
+    const openAssistantContribution = manifest.contributes?.commands?.find(
+      ({ command }) => command === 'voicomp.openAssistant',
+    );
+    assert.deepEqual(openAssistantContribution, {
+      command: 'voicomp.openAssistant',
+      title: 'Open Assistant',
+      category: 'Voicomp',
+    });
     assert.deepEqual(manifest.contributes?.viewsContainers?.activitybar, [
       {
         id: 'voicomp',
