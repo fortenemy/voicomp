@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build and test output
+dist/
+out/
+coverage/
+.vscode-test/
+.vscode-test-web/
+*.tsbuildinfo
+*.vsix
+
+# Tool caches and logs
+.eslintcache
+.npm-cache/
+*.log
+npm-debug.log*
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local agent loop state
+.claude/.ralph-loop.local.md
+
+# Local agent orchestration state
+.superpowers/
+.codex-memory-update/
+.worktrees/
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini
