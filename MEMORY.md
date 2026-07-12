@@ -4,7 +4,8 @@
 
 - All 19 Phase 0 master tasks are complete, independently reviewed, committed,
   synchronized to GitHub, and read back from remote `main`.
-- Phase 1 has not started.
+- Phase 1 planning is active; all 29 Phase 1 implementation tasks remain
+  unchecked and no Phase 1 production code exists yet.
 - Authoritative task cursor: `docs/BUILD_PLAN.md`.
 - Authoritative roadmap state: 265 total tasks, 19 checked in Phase 0, and zero
   checked in Phases 1-16.
@@ -95,7 +96,9 @@
   corrections; its independent re-review had no Critical, Important, or Minor
   findings.
 - Git and GitHub connector readback confirmed remote `main` at `1638123` after
-  the fast-forward push. Phase 1 remains unopened.
+  the fast-forward push. The implementation plan now lives at
+  `docs/superpowers/plans/2026-07-12-voicomp-phase-1.md`; implementation remains
+  at the first unchecked manifest task.
 
 ## Next Unchecked Task
 

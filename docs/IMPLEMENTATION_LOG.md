@@ -270,3 +270,34 @@ the exact next unchecked task. Corrections must be added as a new dated note.
 - Phase 1 remains unopened. The next master task is:
 
 `Create a TypeScript VS Code extension manifest`.
+
+## 2026-07-12 — Phase 1 planning kickoff
+
+### Scope
+
+- Began Phase 1 planning without checking any implementation task or adding
+  extension production code.
+- Added the execution plan at
+  `docs/superpowers/plans/2026-07-12-voicomp-phase-1.md`, mapped to all 29 Phase 1
+  master tasks and the mandatory stop before Phase 2.
+
+### Verified planning inputs
+
+- Official Node.js evidence and the Node distribution identify `v24.18.0` with
+  bundled npm `11.16.0` for the development runtime. The Extension Host bundle
+  still targets Node 20 because VS Code 1.95 runs that host line.
+- npm registry metadata was queried with an isolated temporary cache. Exact pins
+  and peer ranges were recorded for TypeScript, esbuild, Zod, ESLint, Prettier,
+  Vitest, jsdom, VS Code test tooling, VSCE, and type packages. TypeScript
+  `6.0.3` is the latest release accepted by `typescript-eslint@8.63.0`'s
+  `<6.1.0` peer range.
+- Independent agents reviewed dependency compatibility, TDD/file boundaries,
+  official Extension Host testing, VSIX packaging, and isolated VS Code/Cursor
+  installation. The plan keeps two bundles, a single runtime dependency, no
+  provider or workspace capability, and explicit manual-only UI claims.
+
+### Next task
+
+No Phase 1 checkbox is complete. The next master task remains:
+
+`Create a TypeScript VS Code extension manifest`.
