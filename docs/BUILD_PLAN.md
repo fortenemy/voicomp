@@ -71,15 +71,15 @@ This is the first implementation phase and must be completed before real OpenAI 
 - [x] Add Output Channel logging.
 - [x] Add basic settings.
 - [x] Add a placeholder API-key command without calling OpenAI.
-- [ ] Add `README.md`.
-- [ ] Add `.vscodeignore`.
-- [ ] Add `vscode:prepublish`.
-- [ ] Add `npm run build`.
-- [ ] Add `npm run watch`.
-- [ ] Add `npm run lint`.
-- [ ] Add `npm run typecheck`.
-- [ ] Add `npm test`.
-- [ ] Add `npm run package`.
+- [x] Add `README.md`.
+- [x] Add `.vscodeignore`.
+- [x] Add `vscode:prepublish`.
+- [x] Add `npm run build`.
+- [x] Add `npm run watch`.
+- [x] Add `npm run lint`.
+- [x] Add `npm run typecheck`.
+- [x] Add `npm test`.
+- [x] Add `npm run package`.
 - [ ] Produce the first local `.vsix`.
 
 ## Acceptance criteria
