@@ -1,0 +1,12 @@
+artifacts/**
+coverage/**
+dist/**
+docs/**
+node_modules/**
+out/**
+.git/**
+.superpowers/**
+.vscode-test/**
+AGENTS.md
+LICENSE
+MEMORY.md

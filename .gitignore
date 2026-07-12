@@ -5,6 +5,7 @@ node_modules/
 dist/
 out/
 coverage/
+artifacts/
 .vscode-test/
 .vscode-test-web/
 *.tsbuildinfo
