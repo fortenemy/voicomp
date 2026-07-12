@@ -11,9 +11,9 @@ A task may be marked `- [x]` only after concrete evidence verifies completion, s
 - [x] Inspect the repository and preserve any existing useful work.
 - [x] Initialize Git if needed.
 - [x] Create `.gitignore`.
-- [ ] Create `AGENTS.md`.
-- [ ] Create `docs/BUILD_PLAN.md`.
-- [ ] Create `docs/HUMAN_ACTIONS.md`.
+- [x] Create `AGENTS.md`.
+- [x] Create `docs/BUILD_PLAN.md`.
+- [x] Create `docs/HUMAN_ACTIONS.md`.
 - [ ] Create `docs/PRODUCT_SPEC.md`.
 - [ ] Create `docs/ARCHITECTURE.md`.
 - [ ] Create `docs/SECURITY.md`.
@@ -37,12 +37,12 @@ A task may be marked `- [x]` only after concrete evidence verifies completion, s
 
 ## Phase Notes
 
-- **Summary:** Repository inspection, Git initialization, and `.gitignore` creation are verified; remaining Phase 0 work is open.
-- **Files:** `.gitignore` is the only completed roadmap artifact recorded for this phase so far.
-- **Tests:** Repository state and Git history were inspected; full Phase 0 validation remains pending.
-- **Limitations:** Phase 0 is not complete.
-- **Decisions:** Product naming is normalized to Voicomp; future setting and identifier examples use the `voicomp.*` namespace.
-- **Risks:** Architecture, security, privacy, external API, compatibility, publisher, package identifier, and licensing decisions remain unverified.
+- **Summary:** Repository inspection, Git initialization, `.gitignore`, persistent repository instructions, the complete roadmap, and the human-action register are verified. The first open task is `Create docs/PRODUCT_SPEC.md`.
+- **Files:** Verified Phase 0 foundation files include `.gitignore`, `AGENTS.md`, `MEMORY.md`, `docs/BUILD_PLAN.md`, `docs/HUMAN_ACTIONS.md`, and `docs/IMPLEMENTATION_LOG.md`; `README.md` and the approved design and implementation plan provide supporting context.
+- **Tests:** Markdown structure and required content were inspected; all 265 roadmap tasks retain the required per-phase distribution; exactly six Phase 0 tasks and no later task are checked; naming, trailing-whitespace, Git diff, and staged-scope checks passed.
+- **Limitations:** Phase 0 is not complete. No production code or npm scripts exist, so later lint, typecheck, test, and build checks are not yet applicable. Nothing was pushed in this session.
+- **Decisions:** Product naming is normalized to Voicomp; future setting and identifier examples use the `voicomp.*` namespace. The existing MIT license is selected, the local history is based on the remote MIT commit, and documentation remains the control plane until Phase 0 closes.
+- **Risks:** Product, architecture, security, privacy, ADR, external API, compatibility, publisher, package-identifier, and remaining license-record tasks are still open; publishing, credentials, manual platform tests, microphone tests, and final legal/privacy approval remain human-controlled.
 
 ---
 
