@@ -10,8 +10,10 @@ export function activate(context: vscode.ExtensionContext): void {
     (command, handler) => vscode.commands.registerCommand(command, handler),
     (command) => vscode.commands.executeCommand(command),
   );
-  const viewProvider = new VoicompViewProvider((viewId, provider) =>
-    vscode.window.registerWebviewViewProvider(viewId, provider),
+  const viewProvider = new VoicompViewProvider(
+    (viewId, provider) => vscode.window.registerWebviewViewProvider(viewId, provider),
+    context.extensionUri,
+    vscode.Uri.joinPath,
   );
 
   extensionDisposable = vscode.Disposable.from(commandRegistration, viewProvider);
