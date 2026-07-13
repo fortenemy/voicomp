@@ -20,11 +20,9 @@
 - Workspace: `D:\projekty AI\voice_project_companion`.
 - GitHub: https://github.com/fortenemy/voicomp
 - Branch: local `main`, tracking `origin/main`.
-- At the 2026-07-13 review-fix boundary, local `HEAD` is
-  `da63c7965acaaa8ed4f7e66eaf843c416bbeafb2` and `origin/main` is
-  `0f483e18cc52be327e09188f6f469f367f704bc2`; local `main` is 16 commits ahead
-  before the uncommitted final-review fixes. No Phase 1 commit was pushed or
-  published in this session.
+- Remote `origin/main` remains at the Phase 0 boundary `0f483e1`. Local `main`
+  contains the unpushed Phase 1 implementation and final-review corrections
+  after `da63c79`; no Phase 1 commit has been pushed or published.
 - The remote Phase 0 history includes the reviewed and synchronized boundary;
   the local Phase 1 commit series runs from `c21aab8` through `da63c79`.
 - MIT remains the authoritative license. The physical workspace path remains
