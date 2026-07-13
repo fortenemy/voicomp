@@ -80,7 +80,7 @@ This is the first implementation phase and must be completed before real OpenAI 
 - [x] Add `npm run typecheck`.
 - [x] Add `npm test`.
 - [x] Add `npm run package`.
-- [ ] Produce the first local `.vsix`.
+- [x] Produce the first local `.vsix`.
 
 ## Acceptance criteria
 
