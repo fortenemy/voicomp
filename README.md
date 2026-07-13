@@ -23,8 +23,10 @@ architecture decision and security review.
 
 ## Requirements
 
-- Node.js 24 LTS
-- VS Code 1.95 or newer
+- End users need a supported editor. VS Code 1.95 or newer is supported;
+  Cursor remains an explicit manual compatibility test target.
+- Contributors need Node.js 24 LTS for development, testing, building, and
+  packaging. Installing the VSIX does not require end users to install Node.js.
 
 ## Install from a local VSIX
 

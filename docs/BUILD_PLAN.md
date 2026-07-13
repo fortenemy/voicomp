@@ -75,7 +75,7 @@ This is the first implementation phase and must be completed before real OpenAI 
 - [x] Add `.vscodeignore`.
 - [x] Add `vscode:prepublish`.
 - [x] Add `npm run build`.
-- [x] Add `npm run watch`.
+- [ ] Add `npm run watch`.
 - [x] Add `npm run lint`.
 - [x] Add `npm run typecheck`.
 - [x] Add `npm test`.
@@ -116,12 +116,12 @@ After completing Phase 1:
 
 ## Phase Notes
 
-- **Summary:** No work recorded.
-- **Files:** None recorded.
-- **Tests:** Not run.
-- **Limitations:** Phase has not started.
-- **Decisions:** None recorded.
-- **Risks:** None recorded.
+- **Summary:** Phase 1 remains in progress with 28 of 29 tasks checked after reopening Task 24, `Add npm run watch`. Tasks 1-23 and 25-29 have task-specific automated evidence; Task 29 remains checked because the first local VSIX exists and its contents were inspected. Phase 2 remains untouched.
+- **Files:** The Phase 1 offline extension shell, strict TypeScript toolchain, unit and integration tests, build/watch/package scripts, editor launch configuration, package allowlist, README, and local artifact now exist. The preserved artifact is `D:\projekty AI\voice_project_companion\artifacts\voicomp.vsix` with SHA-256 `2BD2795526138889EFCA1E39FD0DF8ECC172A8CEDE8F71F95F955D962DCA52C4`.
+- **Tests:** Automated lint, typecheck, unit and integration tests, production build, package creation and inspection, and isolated VS Code 1.127.0 and Cursor 3.10.20 CLI registration passed. The integration harness also passed on the configured VS Code 1.95.0 minimum target. Direct watch initial-build and source-change rebuild evidence exists, but clean Ctrl+C termination was not observed.
+- **Limitations:** Phase 1 is not complete. Manual F5 launch, Activity Bar/sidebar rendering, mock-state and transcript rendering, Webview/Extension Host round trip, sanitized Output Channel behavior, clean installed VS Code UI, clean installed Cursor UI, and clean watch termination remain open.
+- **Decisions:** Phase 1 remains offline and provider-free. The Webview and Extension Host remain separated by runtime-validated typed messages, and the package contains no provider, network, microphone, workspace-read, or mutation capability. No Phase 2 work is authorized by the current evidence.
+- **Risks:** The full audit reports four findings confined to the development test-tool path, while the production audit reports zero vulnerabilities. Install scripts for `@vscode/vsce-sign`, `esbuild`, and `keytar` are not repository-approved in this phase and remain deferred and risk-tracked. Manual VS Code and Cursor behavior must not be inferred from automated or CLI-only evidence.
 
 ---
 

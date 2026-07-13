@@ -7,15 +7,19 @@ assistant with controlled access to the active workspace. This document is the
 repository-wide security model and disclosure policy.
 
 All 19 Phase 0 master tasks are complete, independently reviewed, committed,
-synchronized to GitHub, and read back from remote `main`. Phase 1 has not started.
+synchronized to GitHub, and read back from remote `main`. Phase 1 implementation
+is in progress with 28 of 29 tasks checked after reopening the watch-script task;
+the manual UI acceptance gate and clean watch-termination evidence remain open.
 
-The repository contains documentation only: no extension runtime, Webview,
-provider connection, microphone path, workspace tool, approval gate, or security
-control described below has been implemented. Phase 1 is planned as an offline
-extension: it will use mock state and transcript data, make no provider call,
-capture no audio, read no workspace content, and perform no mutation. Controls
-assigned to later phases are requirements for future work, not claims about
-current protection or authorization to implement those phases.
+The repository now contains the Phase 1 offline extension runtime, Webview, and
+the controls described in the Phase 1 section below. Unit and integration tests,
+production builds, package inspection, and isolated editor CLI registration have
+automated evidence; manual F5, visible UI, round-trip, Output Channel, clean VS
+Code, and Cursor acceptance remain pending. The implemented shell makes no
+provider or other external network call, captures no microphone audio, reads no
+workspace content, and performs no mutation. Provider connections, microphone
+paths, workspace tools, and approval-gated mutations remain later-phase
+requirements, not current capabilities or authorization to implement them.
 
 ## Assets and security objectives
 
@@ -51,21 +55,23 @@ has passed another boundary.
 
 ## Phase 1 controls
 
-Phase 1 must remain provider-free and offline, with no external network request.
-Direction-specific Zod schemas validate
-both Webview-to-host and host-to-Webview messages at runtime; values begin as
-`unknown`, discriminated unions reject unknown variants, fields are bounded, and
-invalid payloads are rejected without logging their contents. Correlation and
-session identifiers prevent unrelated responses from being accepted.
+Phase 1 is provider-free and offline, with no external network request.
+Direction-specific Zod schemas validate both Webview-to-host and
+host-to-Webview messages at runtime; values begin as `unknown`, discriminated
+unions reject unknown variants, fields are bounded, and invalid payloads are
+rejected without logging their contents. Correlation and session identifiers
+prevent unrelated responses from being accepted.
 
-The Webview must send a restrictive Content Security Policy with
+The Webview sends a restrictive Content Security Policy with
 `default-src 'none'`, a fresh cryptographic nonce for each render, nonce-authorized
 scripts only, and the minimum required local resource sources. Its
 `localResourceRoots` are restricted to the exact packaged asset directories it
-needs. It must not use inline event handlers, remote scripts, or `innerHTML`;
+needs. It does not use inline event handlers, remote scripts, or `innerHTML`;
 untrusted text is rendered with text-safe DOM APIs. Host and view listeners are
 explicitly disposed, late messages are ignored, and Output Channel logs contain
-only allowlisted metadata.
+only allowlisted metadata. These controls have automated unit/integration test
+coverage and were present in the inspected VSIX, but their visible editor UI
+behavior still requires manual acceptance evidence.
 
 ## Future tool and approval model
 

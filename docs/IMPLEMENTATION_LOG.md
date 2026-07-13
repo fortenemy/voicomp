@@ -301,3 +301,113 @@ the exact next unchecked task. Corrections must be added as a new dated note.
 No Phase 1 checkbox is complete. The next master task remains:
 
 `Create a TypeScript VS Code extension manifest`.
+
+## 2026-07-13 — Phase 1 final-review correction session
+
+### Scope and repository state
+
+- Applied only the final-review corrections for the partial Phase 1 boundary.
+  Reopened Task 24, `Add npm run watch`, because direct initial-build and
+  source-change rebuild evidence exists but clean Ctrl+C termination was not
+  observed. Task 29 remains checked from the inspected first local VSIX.
+- Phase 1 remains in progress at 28/29 checked tasks. The manual acceptance
+  gate remains open, and Phase 2 remains untouched.
+- The pre-existing local Phase 1 commit series runs from `c21aab8` through
+  `da63c79`. At session start, local `HEAD` was
+  `da63c7965acaaa8ed4f7e66eaf843c416bbeafb2`, `origin/main` was
+  `0f483e18cc52be327e09188f6f469f367f704bc2`, and local `main` was 16 commits
+  ahead. This correction session created no commit.
+- Corrected `vitest.config.ts`, `README.md`, `docs/BUILD_PLAN.md`,
+  `docs/SECURITY.md`, and `MEMORY.md`, and appended this entry without
+  rewriting prior implementation-log history. Detailed ignored evidence is in
+  `.superpowers/sdd/final-review-fix-report.md`.
+
+### Verified runtime and commands
+
+- All Node/npm checks used
+  `C:\tmp\voicomp-node-v24.18.0\runtime\node-v24.18.0-win-x64`, Node
+  `v24.18.0`, npm `11.16.0`, process-local `npm_config_os=win32`,
+  `npm_config_cpu=x64`, and the workspace-local ignored npm cache
+  `.superpowers/sdd/npm-cache-final-review`.
+- A preliminary `npm ci` using a `C:\tmp` cache failed with Windows
+  `TAR_ENTRY_ERROR`/cleanup warnings and cache `EPERM`; no tracked file or VSIX
+  changed. Repeating `npm ci` with the writable workspace-local process cache
+  restored `node_modules`, added 564 packages, audited 565 packages, and exited
+  0.
+- `npm run test:unit` exited 0 after removal of `passWithNoTests: true`: Vitest
+  reported 11 files and 89 tests passed.
+- `npm run lint` exited 0: ESLint produced zero warnings and Prettier reported
+  all matched files use Prettier code style.
+- `npm run typecheck` exited 0 across the extension, Webview, and unit-test
+  TypeScript configurations.
+- `npm run build` exited 0 after its strict typecheck and production esbuild
+  run.
+- `npm audit` exited 1 with four development-tree findings: two low, one
+  moderate, and one high. `npm audit --omit=dev` exited 0 with zero production
+  vulnerabilities.
+- Markdown/current-status assertions, exact Phase 1 and Phase 2 checkbox
+  counts, preserved artifact checksum, `git diff --check`, and final Git status
+  were run after the corrections; their exact results are recorded in the
+  final-review report.
+
+### Existing automated package and CLI evidence
+
+- The preserved artifact is
+  `D:\projekty AI\voice_project_companion\artifacts\voicomp.vsix`, SHA-256
+  `2BD2795526138889EFCA1E39FD0DF8ECC172A8CEDE8F71F95F955D962DCA52C4`.
+- The Task 7 package sequence exited 0 through `npm ci`, lint, typecheck, full
+  unit and VS Code integration tests, build, `vsce ls`, and package creation.
+  The inspected VSIX contained exactly nine archive files, its resolved main
+  bundle existed, and forbidden-path and credential-shaped scans returned zero
+  findings.
+- Isolated CLI installation and exact listing passed in VS Code 1.127.0 and
+  Cursor 3.10.20, each reporting `fortenemy.voicomp@0.0.1`. These checks prove
+  package acceptance and registration only; neither editor GUI was launched.
+
+### Architecture and security decisions
+
+- Phase 1 remains offline and provider-free. Its implemented shell has no
+  provider or other external network call, API-key input or storage,
+  microphone capture, workspace read/search/list, mutation, terminal action,
+  or telemetry capability.
+- Runtime-validated direction-specific messages, request/session correlation,
+  the restrictive nonce-based Webview CSP, narrow local resource roots,
+  text-safe rendering, disposal, and allowlisted Output Channel logging remain
+  separated across the Webview and Extension Host boundaries.
+- Later provider, microphone, workspace, mutation, approval, and execution
+  controls remain future requirements. This session did not begin or authorize
+  Phase 2.
+
+### Dependency and install-script triage
+
+- The four full-audit findings are confined to development tooling under
+  `@vscode/test-cli@0.0.15 > mocha@11.7.6`: `diff@7.0.0` contributes the low
+  `GHSA-73rr-hh4g-fpgx` finding, and `serialize-javascript@6.0.2` contributes
+  high `GHSA-5c6j-r48x-rmvq` plus moderate `GHSA-qj8w-gfj5-8c6v`. The direct
+  `@vscode/test-cli` aggregate is low and the transitive `mocha` aggregate is
+  moderate. No fix is available for the aggregate test-cli path under the
+  current exact pins; `serialize-javascript` alone reports a fix available.
+- The production tree contains only the project and `zod@4.4.3`; the production
+  audit reports zero vulnerabilities. Runtime dependencies are not affected by
+  the reported findings.
+- npm reported install scripts not yet covered by repository policy for
+  `@vscode/vsce-sign@2.0.9` (`postinstall: node ./src/postinstall.js`),
+  `esbuild@0.28.1` (`postinstall: node install.js`), and optional
+  `keytar@7.9.0` (`install: prebuild-install || npm run build`). These scripts
+  are not repository-approved in Phase 1 and remain deferred and risk-tracked.
+  No `allowScripts` policy was added and no dependency version or pin changed.
+
+### Manual limitations and publication status
+
+- No GUI was launched and no manual claim was made. F5 Development Host
+  launch, Activity Bar/sidebar visibility, mock state and transcript rendering,
+  Webview/Host round-trip, sanitized Voicomp Output Channel behavior, clean
+  installed VS Code UI, and clean installed Cursor UI remain pending.
+- Clean Ctrl+C termination of `npm run watch` remains pending. The prior direct
+  watch evidence verifies initial build and source-change rebuild only.
+- No credential was used, no file was staged, no commit was created, and no
+  push, publication, release, or remote mutation occurred in this session.
+
+### Next unchecked task
+
+`Add npm run watch`, pending clean stop evidence.

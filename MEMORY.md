@@ -2,104 +2,92 @@
 
 ## Current Position
 
-- All 19 Phase 0 master tasks are complete, independently reviewed, committed,
-  synchronized to GitHub, and read back from remote `main`.
-- Phase 1 planning is active; all 29 Phase 1 implementation tasks remain
-  unchecked and no Phase 1 production code exists yet.
-- Authoritative task cursor: `docs/BUILD_PLAN.md`.
-- Authoritative roadmap state: 265 total tasks, 19 checked in Phase 0, and zero
-  checked in Phases 1-16.
-- No extension production code exists.
+- All 19 Phase 0 master tasks are complete and synchronized to remote history.
+- Phase 1 remains in progress: 28 of 29 tasks are checked after Task 24,
+  `Add npm run watch`, was reopened because clean Ctrl+C termination was not
+  observed. Task 29 remains checked from the inspected local VSIX evidence.
+- The Phase 1 manual acceptance gate remains open. Manual F5/UI, message
+  round-trip, Output Channel, clean installed VS Code, and Cursor evidence has
+  not been recorded.
+- Phase 2 is untouched and unauthorized until the Phase 1 stopping point is
+  satisfied and the user gives an explicit instruction.
+- `docs/BUILD_PLAN.md` is the authoritative task cursor. The repository has 265
+  roadmap tasks: Phase 0 is 19/19 checked, Phase 1 is 28/29 checked, and Phases
+  2-16 have zero checked tasks.
 
-## Repository
+## Repository and Git State
 
 - Workspace: `D:\projekty AI\voice_project_companion`.
 - GitHub: https://github.com/fortenemy/voicomp
 - Branch: local `main`, tracking `origin/main`.
-- The reviewed Phase 0 history through
-  `1638123f88b86673bde76d26172017ce85b5a165` was pushed to `origin/main` as a
-  normal fast-forward and confirmed by both Git and the GitHub connector.
-- Remote commit `0fb01b72e031d8c0e34607770bc717c475945ccb` contains the
-  authoritative MIT license. Local history was reconciled onto that commit
-  without force or parallel ancestry.
+- At the 2026-07-13 review-fix boundary, local `HEAD` is
+  `da63c7965acaaa8ed4f7e66eaf843c416bbeafb2` and `origin/main` is
+  `0f483e18cc52be327e09188f6f469f367f704bc2`; local `main` is 16 commits ahead
+  before the uncommitted final-review fixes. No Phase 1 commit was pushed or
+  published in this session.
+- The remote Phase 0 history includes the reviewed and synchronized boundary;
+  the local Phase 1 commit series runs from `c21aab8` through `da63c79`.
+- MIT remains the authoritative license. The physical workspace path remains
+  unchanged.
 
-## Decisions
+## Implemented Phase 1 Surface
 
-- Display name: `Voicomp`.
-- Local package contract: publisher `fortenemy`, package `voicomp`, target
-  extension ID `fortenemy.voicomp`, and `voicomp.*` contribution namespace.
-- The physical workspace path remains unchanged despite its older path token.
-- The repository owner selected the MIT License; `LICENSE` is authoritative.
-- `docs/BUILD_PLAN.md` is the task source of truth, `AGENTS.md` is the durable
-  contributor workflow, this file is the concise snapshot, and
-  `docs/IMPLEMENTATION_LOG.md` is the append-only evidence history.
-- A task is checked only after evidence. Update the build plan after each
-  verified task and update this memory plus the implementation log at every
-  phase or session boundary.
-- Use Node.js 24 LTS, `engines.vscode` `^1.95.0`, and
-  `@types/vscode` pinned to `1.95.x`.
-- The official Node.js 24 LTS patch observed on 2026-07-12 is `v24.18.0`;
-  the local `v24.9.0` runtime must be updated before lockfile generation.
-- Secrets, workspace authority, tools, and mutations stay in the Extension
-  Host; the Webview owns browser media and UI only. Cross-boundary data requires
-  runtime validation, and mutations require explicit approval.
-- Phase 1 is offline. Phase 3 will use an Extension Host-minted short-lived
-  Realtime client secret and WebRTC, preferring `@openai/agents/realtime`
-  behind the provider abstraction.
-- Keep the single extension workspace-capable. In a remote window, detected by
-  `vscode.env.remoteName`, Voicomp must not accept, retrieve, or transmit the
-  standard API key, mint a client secret, or start a live provider session.
-  Remote workspace features remain capability-aware; a future local credential
-  broker plus remote workspace helper requires a separate approved design.
+- The repository contains a strict TypeScript VS Code extension manifest,
+  separate Extension Host and Webview bundles, ESLint, Prettier, Vitest, the
+  official VS Code integration harness, build/watch/test/package scripts,
+  editor launch tasks, an offline Activity Bar/sidebar shell, runtime-validated
+  typed messages, restrictive Webview CSP, sanitized Output Channel logging,
+  a setting, and an informational API-key placeholder.
+- Phase 1 has no provider or external network call, API-key input or storage,
+  microphone capture, workspace read/search/list, mutation, terminal action,
+  telemetry, or publication path.
+- The local artifact is
+  `D:\projekty AI\voice_project_companion\artifacts\voicomp.vsix`.
+  Its SHA-256 is
+  `2BD2795526138889EFCA1E39FD0DF8ECC172A8CEDE8F71F95F955D962DCA52C4`.
+- The VSIX passed exact-content and secret-shape inspection and registered by
+  CLI in isolated VS Code 1.127.0 and Cursor 3.10.20 directories. CLI
+  registration is not visible UI acceptance.
+
+## Environment and Dependency Evidence
+
+- Development Node.js: `v24.18.0` from
+  `C:\tmp\voicomp-node-v24.18.0\runtime\node-v24.18.0-win-x64`.
+- Development npm: `11.16.0`, with process-local `npm_config_os=win32`,
+  `npm_config_cpu=x64`, and an isolated npm cache.
+- End users installing the VSIX do not need Node.js; they need a supported
+  editor. VS Code `1.127.0` and Cursor `3.10.20` CLIs were observed locally,
+  and the package engine floor remains VS Code `^1.95.0`.
+- The full dependency audit reports four development-tree findings: two low,
+  one moderate, and one high, through
+  `@vscode/test-cli@0.0.15 > mocha@11.7.6 > diff@7.0.0` and
+  `serialize-javascript@6.0.2`. The production audit reports zero
+  vulnerabilities; runtime dependency `zod@4.4.3` is not affected.
+- Install scripts for `@vscode/vsce-sign@2.0.9`, `esbuild@0.28.1`, and optional
+  `keytar@7.9.0` are not repository-approved in Phase 1. They remain deferred
+  and risk-tracked; no allow-scripts policy or dependency pin change was added.
+
+## Architecture and Security Decisions
+
+- Product identifiers remain display name `Voicomp`, publisher `fortenemy`,
+  package `voicomp`, target extension ID `fortenemy.voicomp`, and the
+  `voicomp.*` contribution namespace.
+- Secrets, workspace authority, tools, and future mutations stay in the
+  Extension Host. The Webview owns presentation and future browser media only.
+  Cross-boundary data requires runtime validation; future mutations require
+  explicit approval.
+- Remote live-provider work must fail closed whenever `vscode.env.remoteName`
+  is defined. A future local credential broker plus remote helper requires a
+  separate approved design and security review.
 - Cursor compatibility is a manual test target, not an assumed guarantee.
 
-## Verified Environment
+## Open Evidence and Next Task
 
-- Node.js: `v24.9.0`, observed with `node --version` on 2026-07-12.
-- VS Code CLI: `1.127.0`, observed with `code --version` on 2026-07-12.
-- Cursor CLI: `3.10.20`, observed with `cursor --version` on 2026-07-12.
-- Git safe-directory handling: the repository-specific global value
-  `D:/projekty AI/voice_project_companion` resolves the ownership mismatch
-  between the `CodexSandboxOnline` process identity and the `fortenemy`
-  workspace-owner SID.
-- Native Ralph loop: unavailable; neither `ralph-loop` nor `ralph` resolves as
-  a command in the current PowerShell environment.
-- Registry checks on 2026-07-12: the target VS Code Marketplace page and Open
-  VSX endpoint returned HTTP `404`. This is availability evidence only.
-
-## Known Limitations
-
-- No production code, package manifest, npm scripts, OpenAI connection,
-  microphone capture, workspace tooling, edit path, terminal path, or release
-  automation exists yet.
-- Phase 1 npm checks are not applicable until Phase 1 creates their scripts.
-- Local Node.js `v24.9.0` must be updated within Node.js 24 LTS before Phase 1
-  generates the dependency lockfile.
-- No extension has been packaged, manually platform-tested, or published.
-- Publishing accounts, credentials, tokens, legal/privacy approval, and final
-  publication approval remain human-controlled actions.
-- Publisher ownership, immutable identifier approval, and registry availability
-  must be rechecked before publication.
-
-## Last Completed Boundary
-
-- Commit `665b397` records the initial Phase 0 closure boundary. The Phase 0
-  decision series before that boundary is `3116d74`, `4f81090`, `c11a3da`,
-  `bb8b840`, `a0fd969`, `9c7032c`, and `93095ab`.
-- The initial Task 3 review had four Important findings covering phase-status
-  wording, standard-key transfer disclosure, categorical logging prohibition,
-  and future Tool Registry/Storage contracts; the re-review after `93095ab`
-  was clean.
-- The whole-branch review after `665b397` found stale snapshot wording, an
-  unresolved remote-credential boundary, a missing provider/billing human
-  action, and stale Node patch evidence. Commit `1638123` incorporates those
-  corrections; its independent re-review had no Critical, Important, or Minor
-  findings.
-- Git and GitHub connector readback confirmed remote `main` at `1638123` after
-  the fast-forward push. The implementation plan now lives at
-  `docs/superpowers/plans/2026-07-12-voicomp-phase-1.md`; implementation remains
-  at the first unchecked manifest task.
-
-## Next Unchecked Task
-
-`Create a TypeScript VS Code extension manifest`.
+- Required manual evidence: F5 Extension Development Host launch; Activity Bar
+  and sidebar visibility; mock state and transcript rendering; Webview/Host
+  round-trip; sanitized Voicomp Output Channel behavior; and clean installed VS
+  Code and Cursor UI smoke tests.
+- Required Task 24 evidence: clean Ctrl+C termination of `npm run watch`.
+- Exact next unchecked task: `Add npm run watch`.
+- Do not claim Phase 1 complete, begin Phase 2, push, or publish without the
+  remaining evidence and explicit authorization.
