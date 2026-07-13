@@ -24,7 +24,8 @@
   contains the unpushed Phase 1 implementation and final-review corrections
   after `da63c79`; no Phase 1 commit has been pushed or published.
 - The remote Phase 0 history includes the reviewed and synchronized boundary;
-  the local Phase 1 commit series runs from `c21aab8` through `da63c79`.
+  the local Phase 1 implementation series starts at `c21aab8` and is followed
+  by unpushed review-correction commits.
 - MIT remains the authoritative license. The physical workspace path remains
   unchanged.
 
